@@ -1,26 +1,17 @@
 dont_use_io iocell 3 2
 dont_use_io iocell 3 3
-set_location "\PWM:PWMUDB:runmode_enable\" macrocell 1 0 0 1
-set_location "\PWM:PWMUDB:genblk8:stsreg\" statusicell 1 0 4 
-set_location "\PWM:PWMUDB:status_2\" macrocell 1 0 0 0
-set_location "\PWM:PWMUDB:status_0\" macrocell 1 0 1 0
-set_location "Net_392" macrocell 1 0 0 2
-set_location "\PWM:PWMUDB:sP8:pwmdp:u0\" datapathcell 1 0 2 
-set_location "\PWM:PWMUDB:prevCompare1\" macrocell 1 0 0 3
+set_location "ClockBlock" m0s8clockblockcell -1 -1 0
 set_io "\I2C:scl(0)\" iocell 3 0
-set_io "LED(0)" iocell 1 6
 set_io "\I2C:sda(0)\" iocell 3 1
+set_location "ClockGenBlock" m0s8clockgenblockcell -1 -1 0
 set_location "\I2C:SCB\" m0s8scbcell -1 -1 1
 # Warning: unknown type "p4sarmuxcell"
 #set_location "\ADC:cy_psoc4_sarmux_8\" p4sarmuxcell -1 -1 -1 -1
-set_location "\PWM:PWMUDB:genblk1:ctrlreg\" controlcell 1 0 6 
 set_location "\I2C:SCB_IRQ\" interrupt -1 -1 11
-set_location "ClockGenBlock" m0s8clockgenblockcell -1 -1 0
 set_location "\ADC:IRQ\" interrupt -1 -1 14
-set_io "\ADC:Bypass(0)\" iocell 1 7
-set_io "Battery(0)" iocell 2 1
-set_io "Alternator(0)" iocell 2 2
-set_io "Outside(0)" iocell 2 3
-set_io "Inside(0)" iocell 2 4
-set_location "ClockBlock" m0s8clockblockcell -1 -1 0
+set_io "\TX:tx(0)\" iocell 4 1
+set_io "Battery(0)" iocell 2 3
+set_io "Alternator(0)" iocell 2 4
+set_io "Outside(0)" iocell 2 2
+set_io "Inside(0)" iocell 2 1
 set_location "\ADC:cy_psoc4_sar\" p4sarcell -1 -1 0

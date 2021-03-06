@@ -1,0 +1,3426 @@
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"printf.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.global	__aeabi_uidiv
+  20              		.global	__aeabi_uidivmod
+  21              		.section	.text.ui2a,"ax",%progbits
+  22              		.align	2
+  23              		.code	16
+  24              		.thumb_func
+  25              		.type	ui2a, %function
+  26              	ui2a:
+  27              	.LFB0:
+  28              		.file 1 "tinyprintf\\API\\printf.c"
+   1:tinyprintf\API/printf.c **** /*
+   2:tinyprintf\API/printf.c ****  * Copyright (c) 2004,2012 Kustaa Nyholm / SpareTimeLabs
+   3:tinyprintf\API/printf.c ****  *
+   4:tinyprintf\API/printf.c ****  * All rights reserved.
+   5:tinyprintf\API/printf.c ****  *
+   6:tinyprintf\API/printf.c ****  * Redistribution and use in source and binary forms, with or without modification, 
+   7:tinyprintf\API/printf.c ****  * are permitted provided that the following conditions are met:
+   8:tinyprintf\API/printf.c ****  *
+   9:tinyprintf\API/printf.c ****  * Redistributions of source code must retain the above copyright notice, this list 
+  10:tinyprintf\API/printf.c ****  * of conditions and the following disclaimer.
+  11:tinyprintf\API/printf.c ****  * 
+  12:tinyprintf\API/printf.c ****  * Redistributions in binary form must reproduce the above copyright notice, this 
+  13:tinyprintf\API/printf.c ****  * list of conditions and the following disclaimer in the documentation and/or other
+  14:tinyprintf\API/printf.c ****  * materials provided with the distribution.
+  15:tinyprintf\API/printf.c ****  *  
+  16:tinyprintf\API/printf.c ****  * Neither the name of the Kustaa Nyholm or SpareTimeLabs nor the names of its 
+  17:tinyprintf\API/printf.c ****  * contributors may be used to endorse or promote products derived from this software 
+  18:tinyprintf\API/printf.c ****  * without specific prior written permission.
+  19:tinyprintf\API/printf.c ****  * 
+  20:tinyprintf\API/printf.c ****  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+  21:tinyprintf\API/printf.c ****  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  22:tinyprintf\API/printf.c ****  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  23:tinyprintf\API/printf.c ****  * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  24:tinyprintf\API/printf.c ****  * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  25:tinyprintf\API/printf.c ****  * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
+  26:tinyprintf\API/printf.c ****  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  27:tinyprintf\API/printf.c ****  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  28:tinyprintf\API/printf.c ****  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+  29:tinyprintf\API/printf.c ****  * OF SUCH DAMAGE.
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 2
+
+
+  30:tinyprintf\API/printf.c ****  */
+  31:tinyprintf\API/printf.c **** 
+  32:tinyprintf\API/printf.c **** #include "printf.h"
+  33:tinyprintf\API/printf.c **** 
+  34:tinyprintf\API/printf.c **** typedef void (*putcf) (void*,char);
+  35:tinyprintf\API/printf.c **** static putcf stdout_putf;
+  36:tinyprintf\API/printf.c **** static void* stdout_putp;
+  37:tinyprintf\API/printf.c **** 
+  38:tinyprintf\API/printf.c **** 
+  39:tinyprintf\API/printf.c **** #ifdef PRINTF_LONG_SUPPORT
+  40:tinyprintf\API/printf.c **** 
+  41:tinyprintf\API/printf.c **** static void uli2a(unsigned long int num, unsigned int base, int uc,char * bf)
+  42:tinyprintf\API/printf.c **** 	{
+  43:tinyprintf\API/printf.c **** 	int n=0;
+  44:tinyprintf\API/printf.c **** 	unsigned int d=1;
+  45:tinyprintf\API/printf.c **** 	while (num/d >= base)
+  46:tinyprintf\API/printf.c **** 		d*=base;		 
+  47:tinyprintf\API/printf.c **** 	while (d!=0) {
+  48:tinyprintf\API/printf.c **** 		int dgt = num / d;
+  49:tinyprintf\API/printf.c **** 		num%=d;
+  50:tinyprintf\API/printf.c **** 		d/=base;
+  51:tinyprintf\API/printf.c **** 		if (n || dgt>0|| d==0) {
+  52:tinyprintf\API/printf.c **** 			*bf++ = dgt+(dgt<10 ? '0' : (uc ? 'A' : 'a')-10);
+  53:tinyprintf\API/printf.c **** 			++n;
+  54:tinyprintf\API/printf.c **** 			}
+  55:tinyprintf\API/printf.c **** 		}
+  56:tinyprintf\API/printf.c **** 	*bf=0;
+  57:tinyprintf\API/printf.c **** 	}
+  58:tinyprintf\API/printf.c **** 
+  59:tinyprintf\API/printf.c **** static void li2a (long num, char * bf)
+  60:tinyprintf\API/printf.c **** 	{
+  61:tinyprintf\API/printf.c **** 	if (num<0) {
+  62:tinyprintf\API/printf.c **** 		num=-num;
+  63:tinyprintf\API/printf.c **** 		*bf++ = '-';
+  64:tinyprintf\API/printf.c **** 		}
+  65:tinyprintf\API/printf.c **** 	uli2a(num,10,0,bf);
+  66:tinyprintf\API/printf.c **** 	}
+  67:tinyprintf\API/printf.c **** 
+  68:tinyprintf\API/printf.c **** #endif
+  69:tinyprintf\API/printf.c **** 
+  70:tinyprintf\API/printf.c **** static void ui2a(unsigned int num, unsigned int base, int uc,char * bf)
+  71:tinyprintf\API/printf.c **** 	{
+  29              		.loc 1 71 0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 8
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              	.LVL0:
+  34 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+  35              		.cfi_def_cfa_offset 20
+  36              		.cfi_offset 4, -20
+  37              		.cfi_offset 5, -16
+  38              		.cfi_offset 6, -12
+  39              		.cfi_offset 7, -8
+  40              		.cfi_offset 14, -4
+  41 0002 5746     		mov	r7, r10
+  42 0004 4E46     		mov	r6, r9
+  43 0006 C0B4     		push	{r6, r7}
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 3
+
+
+  44              		.cfi_def_cfa_offset 28
+  45              		.cfi_offset 9, -28
+  46              		.cfi_offset 10, -24
+  47 0008 83B0     		sub	sp, sp, #12
+  48              		.cfi_def_cfa_offset 40
+  49 000a 0090     		str	r0, [sp]
+  50 000c 0F00     		movs	r7, r1
+  51 000e 9246     		mov	r10, r2
+  52 0010 1E00     		movs	r6, r3
+  53              	.LVL1:
+  72:tinyprintf\API/printf.c **** 	int n=0;
+  73:tinyprintf\API/printf.c **** 	unsigned int d=1;
+  54              		.loc 1 73 0
+  55 0012 0124     		movs	r4, #1
+  74:tinyprintf\API/printf.c **** 	while (num/d >= base)
+  56              		.loc 1 74 0
+  57 0014 00E0     		b	.L2
+  58              	.LVL2:
+  59              	.L3:
+  75:tinyprintf\API/printf.c **** 		d*=base;		
+  60              		.loc 1 75 0
+  61 0016 7C43     		muls	r4, r7
+  62              	.LVL3:
+  63              	.L2:
+  74:tinyprintf\API/printf.c **** 	while (num/d >= base)
+  64              		.loc 1 74 0
+  65 0018 2100     		movs	r1, r4
+  66 001a 0098     		ldr	r0, [sp]
+  67 001c FFF7FEFF 		bl	__aeabi_uidiv
+  68              	.LVL4:
+  69 0020 B842     		cmp	r0, r7
+  70 0022 F8D2     		bcs	.L3
+  71 0024 0023     		movs	r3, #0
+  72 0026 9946     		mov	r9, r3
+  73 0028 28E0     		b	.L4
+  74              	.LVL5:
+  75              	.L8:
+  76              	.LBB2:
+  76:tinyprintf\API/printf.c **** 	while (d!=0) {
+  77:tinyprintf\API/printf.c **** 		int dgt = num / d;
+  77              		.loc 1 77 0
+  78 002a 2100     		movs	r1, r4
+  79 002c 0098     		ldr	r0, [sp]
+  80 002e FFF7FEFF 		bl	__aeabi_uidiv
+  81              	.LVL6:
+  82 0032 0500     		movs	r5, r0
+  83 0034 0190     		str	r0, [sp, #4]
+  84              	.LVL7:
+  78:tinyprintf\API/printf.c **** 		num%= d;
+  85              		.loc 1 78 0
+  86 0036 2100     		movs	r1, r4
+  87 0038 0098     		ldr	r0, [sp]
+  88              	.LVL8:
+  89 003a FFF7FEFF 		bl	__aeabi_uidivmod
+  90              	.LVL9:
+  91 003e 0091     		str	r1, [sp]
+  92              	.LVL10:
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 4
+
+
+  79:tinyprintf\API/printf.c **** 		d/=base;
+  93              		.loc 1 79 0
+  94 0040 3900     		movs	r1, r7
+  95              	.LVL11:
+  96 0042 2000     		movs	r0, r4
+  97 0044 FFF7FEFF 		bl	__aeabi_uidiv
+  98              	.LVL12:
+  99 0048 0400     		movs	r4, r0
+ 100              	.LVL13:
+  80:tinyprintf\API/printf.c **** 		if (n || dgt>0 || d==0) {
+ 101              		.loc 1 80 0
+ 102 004a 4B46     		mov	r3, r9
+ 103 004c 002B     		cmp	r3, #0
+ 104 004e 03D1     		bne	.L5
+ 105              	.LVL14:
+ 106              		.loc 1 80 0 is_stmt 0 discriminator 1
+ 107 0050 002D     		cmp	r5, #0
+ 108 0052 01DC     		bgt	.L5
+ 109              		.loc 1 80 0 discriminator 2
+ 110 0054 0028     		cmp	r0, #0
+ 111 0056 11D1     		bne	.L4
+ 112              	.L5:
+  81:tinyprintf\API/printf.c **** 			*bf++ = dgt+(dgt<10 ? '0' : (uc ? 'A' : 'a')-10);
+ 113              		.loc 1 81 0 is_stmt 1
+ 114 0058 731C     		adds	r3, r6, #1
+ 115              	.LVL15:
+ 116 005a 092D     		cmp	r5, #9
+ 117 005c 04DD     		ble	.L9
+ 118              		.loc 1 81 0 is_stmt 0 discriminator 1
+ 119 005e 5246     		mov	r2, r10
+ 120 0060 002A     		cmp	r2, #0
+ 121 0062 03D0     		beq	.L10
+ 122              	.LVL16:
+ 123              		.loc 1 81 0
+ 124 0064 3722     		movs	r2, #55
+ 125              	.LVL17:
+ 126 0066 02E0     		b	.L7
+ 127              	.L9:
+ 128 0068 3022     		movs	r2, #48
+ 129 006a 00E0     		b	.L7
+ 130              	.LVL18:
+ 131              	.L10:
+ 132 006c 5722     		movs	r2, #87
+ 133              	.LVL19:
+ 134              	.L7:
+ 135              		.loc 1 81 0 discriminator 8
+ 136 006e 0199     		ldr	r1, [sp, #4]
+ 137 0070 5518     		adds	r5, r2, r1
+ 138              	.LVL20:
+ 139 0072 3570     		strb	r5, [r6]
+  82:tinyprintf\API/printf.c **** 			++n;
+ 140              		.loc 1 82 0 is_stmt 1 discriminator 8
+ 141 0074 0122     		movs	r2, #1
+ 142 0076 9446     		mov	ip, r2
+ 143 0078 E144     		add	r9, r9, ip
+ 144              	.LVL21:
+  81:tinyprintf\API/printf.c **** 			*bf++ = dgt+(dgt<10 ? '0' : (uc ? 'A' : 'a')-10);
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 5
+
+
+ 145              		.loc 1 81 0 discriminator 8
+ 146 007a 1E00     		movs	r6, r3
+ 147              	.LVL22:
+ 148              	.L4:
+ 149              	.LBE2:
+  76:tinyprintf\API/printf.c **** 		int dgt = num / d;
+ 150              		.loc 1 76 0
+ 151 007c 002C     		cmp	r4, #0
+ 152 007e D4D1     		bne	.L8
+  83:tinyprintf\API/printf.c **** 			}
+  84:tinyprintf\API/printf.c **** 		}
+  85:tinyprintf\API/printf.c **** 	*bf=0;
+ 153              		.loc 1 85 0
+ 154 0080 0023     		movs	r3, #0
+ 155 0082 3370     		strb	r3, [r6]
+  86:tinyprintf\API/printf.c **** 	}
+ 156              		.loc 1 86 0
+ 157 0084 03B0     		add	sp, sp, #12
+ 158              	.LVL23:
+ 159              		@ sp needed
+ 160              	.LVL24:
+ 161              	.LVL25:
+ 162              	.LVL26:
+ 163              	.LVL27:
+ 164              	.LVL28:
+ 165 0086 0CBC     		pop	{r2, r3}
+ 166 0088 9146     		mov	r9, r2
+ 167 008a 9A46     		mov	r10, r3
+ 168 008c F0BD     		pop	{r4, r5, r6, r7, pc}
+ 169              		.cfi_endproc
+ 170              	.LFE0:
+ 171              		.size	ui2a, .-ui2a
+ 172 008e C046     		.section	.text.i2a,"ax",%progbits
+ 173              		.align	2
+ 174              		.code	16
+ 175              		.thumb_func
+ 176              		.type	i2a, %function
+ 177              	i2a:
+ 178              	.LFB1:
+  87:tinyprintf\API/printf.c **** 
+  88:tinyprintf\API/printf.c **** static void i2a (int num, char * bf)
+  89:tinyprintf\API/printf.c **** 	{
+ 179              		.loc 1 89 0
+ 180              		.cfi_startproc
+ 181              		@ args = 0, pretend = 0, frame = 0
+ 182              		@ frame_needed = 0, uses_anonymous_args = 0
+ 183              	.LVL29:
+ 184 0000 10B5     		push	{r4, lr}
+ 185              		.cfi_def_cfa_offset 8
+ 186              		.cfi_offset 4, -8
+ 187              		.cfi_offset 14, -4
+ 188 0002 0B00     		movs	r3, r1
+  90:tinyprintf\API/printf.c **** 	if (num<0) {
+ 189              		.loc 1 90 0
+ 190 0004 0028     		cmp	r0, #0
+ 191 0006 03DA     		bge	.L12
+  91:tinyprintf\API/printf.c **** 		num=-num;
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 6
+
+
+ 192              		.loc 1 91 0
+ 193 0008 4042     		rsbs	r0, r0, #0
+ 194              	.LVL30:
+  92:tinyprintf\API/printf.c **** 		*bf++ = '-';
+ 195              		.loc 1 92 0
+ 196 000a 2D22     		movs	r2, #45
+ 197 000c 0A70     		strb	r2, [r1]
+ 198 000e 0133     		adds	r3, r3, #1
+ 199              	.LVL31:
+ 200              	.L12:
+  93:tinyprintf\API/printf.c **** 		}
+  94:tinyprintf\API/printf.c **** 	ui2a(num,10,0,bf);
+ 201              		.loc 1 94 0
+ 202 0010 0022     		movs	r2, #0
+ 203 0012 0A21     		movs	r1, #10
+ 204 0014 FFF7FEFF 		bl	ui2a
+ 205              	.LVL32:
+  95:tinyprintf\API/printf.c **** 	}
+ 206              		.loc 1 95 0
+ 207              		@ sp needed
+ 208 0018 10BD     		pop	{r4, pc}
+ 209              		.cfi_endproc
+ 210              	.LFE1:
+ 211              		.size	i2a, .-i2a
+ 212 001a C046     		.section	.text.a2d,"ax",%progbits
+ 213              		.align	2
+ 214              		.code	16
+ 215              		.thumb_func
+ 216              		.type	a2d, %function
+ 217              	a2d:
+ 218              	.LFB2:
+  96:tinyprintf\API/printf.c **** 
+  97:tinyprintf\API/printf.c **** static int a2d(char ch)
+  98:tinyprintf\API/printf.c **** 	{
+ 219              		.loc 1 98 0
+ 220              		.cfi_startproc
+ 221              		@ args = 0, pretend = 0, frame = 0
+ 222              		@ frame_needed = 0, uses_anonymous_args = 0
+ 223              		@ link register save eliminated.
+ 224              	.LVL33:
+  99:tinyprintf\API/printf.c **** 	if (ch>='0' && ch<='9') 
+ 225              		.loc 1 99 0
+ 226 0000 0300     		movs	r3, r0
+ 227 0002 303B     		subs	r3, r3, #48
+ 228 0004 DBB2     		uxtb	r3, r3
+ 229 0006 092B     		cmp	r3, #9
+ 230 0008 01D8     		bhi	.L14
+ 100:tinyprintf\API/printf.c **** 		return ch-'0';
+ 231              		.loc 1 100 0
+ 232 000a 3038     		subs	r0, r0, #48
+ 233              	.LVL34:
+ 234 000c 0FE0     		b	.L15
+ 235              	.LVL35:
+ 236              	.L14:
+ 101:tinyprintf\API/printf.c **** 	else if (ch>='a' && ch<='f')
+ 237              		.loc 1 101 0
+ 238 000e 0300     		movs	r3, r0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 7
+
+
+ 239 0010 613B     		subs	r3, r3, #97
+ 240 0012 DBB2     		uxtb	r3, r3
+ 241 0014 052B     		cmp	r3, #5
+ 242 0016 01D8     		bhi	.L16
+ 102:tinyprintf\API/printf.c **** 		return ch-'a'+10;
+ 243              		.loc 1 102 0
+ 244 0018 5738     		subs	r0, r0, #87
+ 245              	.LVL36:
+ 246 001a 08E0     		b	.L15
+ 247              	.LVL37:
+ 248              	.L16:
+ 103:tinyprintf\API/printf.c **** 	else if (ch>='A' && ch<='F')
+ 249              		.loc 1 103 0
+ 250 001c 0300     		movs	r3, r0
+ 251 001e 413B     		subs	r3, r3, #65
+ 252 0020 DBB2     		uxtb	r3, r3
+ 253 0022 052B     		cmp	r3, #5
+ 254 0024 01D8     		bhi	.L17
+ 104:tinyprintf\API/printf.c **** 		return ch-'A'+10;
+ 255              		.loc 1 104 0
+ 256 0026 3738     		subs	r0, r0, #55
+ 257              	.LVL38:
+ 258 0028 01E0     		b	.L15
+ 259              	.LVL39:
+ 260              	.L17:
+ 105:tinyprintf\API/printf.c **** 	else return -1;
+ 261              		.loc 1 105 0
+ 262 002a 0120     		movs	r0, #1
+ 263              	.LVL40:
+ 264 002c 4042     		rsbs	r0, r0, #0
+ 265              	.L15:
+ 106:tinyprintf\API/printf.c **** 	}
+ 266              		.loc 1 106 0
+ 267              		@ sp needed
+ 268 002e 7047     		bx	lr
+ 269              		.cfi_endproc
+ 270              	.LFE2:
+ 271              		.size	a2d, .-a2d
+ 272              		.section	.text.a2i,"ax",%progbits
+ 273              		.align	2
+ 274              		.code	16
+ 275              		.thumb_func
+ 276              		.type	a2i, %function
+ 277              	a2i:
+ 278              	.LFB3:
+ 107:tinyprintf\API/printf.c **** 
+ 108:tinyprintf\API/printf.c **** static char a2i(char ch, char** src,int base,int* nump)
+ 109:tinyprintf\API/printf.c **** 	{
+ 279              		.loc 1 109 0
+ 280              		.cfi_startproc
+ 281              		@ args = 0, pretend = 0, frame = 0
+ 282              		@ frame_needed = 0, uses_anonymous_args = 0
+ 283              	.LVL41:
+ 284 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 285              		.cfi_def_cfa_offset 24
+ 286              		.cfi_offset 3, -24
+ 287              		.cfi_offset 4, -20
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 8
+
+
+ 288              		.cfi_offset 5, -16
+ 289              		.cfi_offset 6, -12
+ 290              		.cfi_offset 7, -8
+ 291              		.cfi_offset 14, -4
+ 292 0002 4F46     		mov	r7, r9
+ 293 0004 4646     		mov	r6, r8
+ 294 0006 C0B4     		push	{r6, r7}
+ 295              		.cfi_def_cfa_offset 32
+ 296              		.cfi_offset 8, -32
+ 297              		.cfi_offset 9, -28
+ 298 0008 0600     		movs	r6, r0
+ 299 000a 8846     		mov	r8, r1
+ 300 000c 1700     		movs	r7, r2
+ 301 000e 9946     		mov	r9, r3
+ 110:tinyprintf\API/printf.c **** 	char* p= *src;
+ 302              		.loc 1 110 0
+ 303 0010 0D68     		ldr	r5, [r1]
+ 304              	.LVL42:
+ 111:tinyprintf\API/printf.c **** 	int num=0;
+ 305              		.loc 1 111 0
+ 306 0012 0024     		movs	r4, #0
+ 112:tinyprintf\API/printf.c **** 	int digit;
+ 113:tinyprintf\API/printf.c **** 	while ((digit=a2d(ch))>=0) {
+ 307              		.loc 1 113 0
+ 308 0014 05E0     		b	.L19
+ 309              	.LVL43:
+ 310              	.L21:
+ 114:tinyprintf\API/printf.c **** 		if (digit>base) break;
+ 311              		.loc 1 114 0
+ 312 0016 B842     		cmp	r0, r7
+ 313 0018 08DC     		bgt	.L20
+ 115:tinyprintf\API/printf.c **** 		num=num*base+digit;
+ 314              		.loc 1 115 0
+ 315 001a 7C43     		muls	r4, r7
+ 316              	.LVL44:
+ 317 001c 0419     		adds	r4, r0, r4
+ 318              	.LVL45:
+ 116:tinyprintf\API/printf.c **** 		ch=*p++;
+ 319              		.loc 1 116 0
+ 320 001e 2E78     		ldrb	r6, [r5]
+ 321              	.LVL46:
+ 322 0020 0135     		adds	r5, r5, #1
+ 323              	.LVL47:
+ 324              	.L19:
+ 113:tinyprintf\API/printf.c **** 		if (digit>base) break;
+ 325              		.loc 1 113 0
+ 326 0022 3000     		movs	r0, r6
+ 327 0024 FFF7FEFF 		bl	a2d
+ 328              	.LVL48:
+ 329 0028 0028     		cmp	r0, #0
+ 330 002a F4DA     		bge	.L21
+ 331              	.L20:
+ 117:tinyprintf\API/printf.c **** 		}
+ 118:tinyprintf\API/printf.c **** 	*src=p;
+ 332              		.loc 1 118 0
+ 333 002c 4346     		mov	r3, r8
+ 334 002e 1D60     		str	r5, [r3]
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 9
+
+
+ 119:tinyprintf\API/printf.c **** 	*nump=num;
+ 335              		.loc 1 119 0
+ 336 0030 4B46     		mov	r3, r9
+ 337 0032 1C60     		str	r4, [r3]
+ 120:tinyprintf\API/printf.c **** 	return ch;
+ 121:tinyprintf\API/printf.c **** 	}
+ 338              		.loc 1 121 0
+ 339 0034 3000     		movs	r0, r6
+ 340              	.LVL49:
+ 341              		@ sp needed
+ 342              	.LVL50:
+ 343              	.LVL51:
+ 344              	.LVL52:
+ 345              	.LVL53:
+ 346              	.LVL54:
+ 347              	.LVL55:
+ 348 0036 0CBC     		pop	{r2, r3}
+ 349 0038 9046     		mov	r8, r2
+ 350 003a 9946     		mov	r9, r3
+ 351 003c F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 352              		.cfi_endproc
+ 353              	.LFE3:
+ 354              		.size	a2i, .-a2i
+ 355 003e C046     		.section	.text.putchw,"ax",%progbits
+ 356              		.align	2
+ 357              		.code	16
+ 358              		.thumb_func
+ 359              		.type	putchw, %function
+ 360              	putchw:
+ 361              	.LFB4:
+ 122:tinyprintf\API/printf.c **** 
+ 123:tinyprintf\API/printf.c **** static void putchw(void* putp,putcf putf,int n, char z, char* bf)
+ 124:tinyprintf\API/printf.c **** 	{
+ 362              		.loc 1 124 0
+ 363              		.cfi_startproc
+ 364              		@ args = 4, pretend = 0, frame = 8
+ 365              		@ frame_needed = 0, uses_anonymous_args = 0
+ 366              	.LVL56:
+ 367 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 368              		.cfi_def_cfa_offset 20
+ 369              		.cfi_offset 4, -20
+ 370              		.cfi_offset 5, -16
+ 371              		.cfi_offset 6, -12
+ 372              		.cfi_offset 7, -8
+ 373              		.cfi_offset 14, -4
+ 374 0002 83B0     		sub	sp, sp, #12
+ 375              		.cfi_def_cfa_offset 32
+ 376 0004 0500     		movs	r5, r0
+ 377 0006 0F00     		movs	r7, r1
+ 378 0008 089C     		ldr	r4, [sp, #32]
+ 125:tinyprintf\API/printf.c **** 	char fc=z? '0' : ' ';
+ 379              		.loc 1 125 0
+ 380 000a 002B     		cmp	r3, #0
+ 381 000c 02D0     		beq	.L30
+ 382 000e 3023     		movs	r3, #48
+ 383              	.LVL57:
+ 384 0010 0193     		str	r3, [sp, #4]
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 10
+
+
+ 385 0012 01E0     		b	.L23
+ 386              	.LVL58:
+ 387              	.L30:
+ 388 0014 2023     		movs	r3, #32
+ 389              	.LVL59:
+ 390 0016 0193     		str	r3, [sp, #4]
+ 391              	.L23:
+ 392              	.LVL60:
+ 126:tinyprintf\API/printf.c **** 	char ch;
+ 127:tinyprintf\API/printf.c **** 	char* p=bf;
+ 393              		.loc 1 127 0 discriminator 4
+ 394 0018 2300     		movs	r3, r4
+ 128:tinyprintf\API/printf.c **** 	while (*p++ && n > 0)
+ 395              		.loc 1 128 0 discriminator 4
+ 396 001a 01E0     		b	.L24
+ 397              	.LVL61:
+ 398              	.L26:
+ 129:tinyprintf\API/printf.c **** 		n--;
+ 399              		.loc 1 129 0
+ 400 001c 013A     		subs	r2, r2, #1
+ 401              	.LVL62:
+ 128:tinyprintf\API/printf.c **** 	while (*p++ && n > 0)
+ 402              		.loc 1 128 0
+ 403 001e 0B00     		movs	r3, r1
+ 404              	.LVL63:
+ 405              	.L24:
+ 406 0020 591C     		adds	r1, r3, #1
+ 407              	.LVL64:
+ 408 0022 1B78     		ldrb	r3, [r3]
+ 409 0024 002B     		cmp	r3, #0
+ 410 0026 06D0     		beq	.L25
+ 128:tinyprintf\API/printf.c **** 	while (*p++ && n > 0)
+ 411              		.loc 1 128 0 is_stmt 0 discriminator 1
+ 412 0028 002A     		cmp	r2, #0
+ 413 002a F7DC     		bgt	.L26
+ 414 002c 03E0     		b	.L25
+ 415              	.LVL65:
+ 416              	.L27:
+ 130:tinyprintf\API/printf.c **** 	while (n-- > 0) 
+ 131:tinyprintf\API/printf.c **** 		putf(putp,fc);
+ 417              		.loc 1 131 0 is_stmt 1
+ 418 002e 0199     		ldr	r1, [sp, #4]
+ 419 0030 2800     		movs	r0, r5
+ 420 0032 B847     		blx	r7
+ 421              	.LVL66:
+ 130:tinyprintf\API/printf.c **** 	while (n-- > 0) 
+ 422              		.loc 1 130 0
+ 423 0034 3200     		movs	r2, r6
+ 424              	.LVL67:
+ 425              	.L25:
+ 426 0036 561E     		subs	r6, r2, #1
+ 427              	.LVL68:
+ 428 0038 002A     		cmp	r2, #0
+ 429 003a F8DC     		bgt	.L27
+ 430 003c 02E0     		b	.L28
+ 431              	.LVL69:
+ 432              	.L29:
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 11
+
+
+ 132:tinyprintf\API/printf.c **** 	while ((ch= *bf++))
+ 133:tinyprintf\API/printf.c **** 		putf(putp,ch);
+ 433              		.loc 1 133 0
+ 434 003e 2800     		movs	r0, r5
+ 435 0040 B847     		blx	r7
+ 436              	.LVL70:
+ 132:tinyprintf\API/printf.c **** 	while ((ch= *bf++))
+ 437              		.loc 1 132 0
+ 438 0042 3400     		movs	r4, r6
+ 439              	.LVL71:
+ 440              	.L28:
+ 441 0044 661C     		adds	r6, r4, #1
+ 442              	.LVL72:
+ 443 0046 2178     		ldrb	r1, [r4]
+ 444              	.LVL73:
+ 445 0048 0029     		cmp	r1, #0
+ 446 004a F8D1     		bne	.L29
+ 134:tinyprintf\API/printf.c **** 	}
+ 447              		.loc 1 134 0
+ 448 004c 03B0     		add	sp, sp, #12
+ 449              		@ sp needed
+ 450              	.LVL74:
+ 451              	.LVL75:
+ 452              	.LVL76:
+ 453 004e F0BD     		pop	{r4, r5, r6, r7, pc}
+ 454              		.cfi_endproc
+ 455              	.LFE4:
+ 456              		.size	putchw, .-putchw
+ 457              		.section	.text.putcp,"ax",%progbits
+ 458              		.align	2
+ 459              		.code	16
+ 460              		.thumb_func
+ 461              		.type	putcp, %function
+ 462              	putcp:
+ 463              	.LFB8:
+ 135:tinyprintf\API/printf.c **** 
+ 136:tinyprintf\API/printf.c **** void tfp_format(void* putp,putcf putf,char *fmt, va_list va)
+ 137:tinyprintf\API/printf.c **** 	{
+ 138:tinyprintf\API/printf.c **** 	char bf[12];
+ 139:tinyprintf\API/printf.c ****     
+ 140:tinyprintf\API/printf.c **** 	char ch;
+ 141:tinyprintf\API/printf.c **** 
+ 142:tinyprintf\API/printf.c **** 
+ 143:tinyprintf\API/printf.c **** 	while ((ch=*(fmt++))) {
+ 144:tinyprintf\API/printf.c **** 		if (ch!='%') 
+ 145:tinyprintf\API/printf.c **** 			putf(putp,ch);
+ 146:tinyprintf\API/printf.c **** 		else {
+ 147:tinyprintf\API/printf.c **** 			char lz=0;
+ 148:tinyprintf\API/printf.c **** #ifdef 	PRINTF_LONG_SUPPORT
+ 149:tinyprintf\API/printf.c **** 			char lng=0;
+ 150:tinyprintf\API/printf.c **** #endif
+ 151:tinyprintf\API/printf.c **** 			int w=0;
+ 152:tinyprintf\API/printf.c **** 			ch=*(fmt++);
+ 153:tinyprintf\API/printf.c **** 			if (ch=='0') {
+ 154:tinyprintf\API/printf.c **** 				ch=*(fmt++);
+ 155:tinyprintf\API/printf.c **** 				lz=1;
+ 156:tinyprintf\API/printf.c **** 				}
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 12
+
+
+ 157:tinyprintf\API/printf.c **** 			if (ch>='0' && ch<='9') {
+ 158:tinyprintf\API/printf.c **** 				ch=a2i(ch,&fmt,10,&w);
+ 159:tinyprintf\API/printf.c **** 				}
+ 160:tinyprintf\API/printf.c **** #ifdef 	PRINTF_LONG_SUPPORT
+ 161:tinyprintf\API/printf.c **** 			if (ch=='l') {
+ 162:tinyprintf\API/printf.c **** 				ch=*(fmt++);
+ 163:tinyprintf\API/printf.c **** 				lng=1;
+ 164:tinyprintf\API/printf.c **** 			}
+ 165:tinyprintf\API/printf.c **** #endif
+ 166:tinyprintf\API/printf.c **** 			switch (ch) {
+ 167:tinyprintf\API/printf.c **** 				case 0: 
+ 168:tinyprintf\API/printf.c **** 					goto abort;
+ 169:tinyprintf\API/printf.c **** 				case 'u' : {
+ 170:tinyprintf\API/printf.c **** #ifdef 	PRINTF_LONG_SUPPORT
+ 171:tinyprintf\API/printf.c **** 					if (lng)
+ 172:tinyprintf\API/printf.c **** 						uli2a(va_arg(va, unsigned long int),10,0,bf);
+ 173:tinyprintf\API/printf.c **** 					else
+ 174:tinyprintf\API/printf.c **** #endif
+ 175:tinyprintf\API/printf.c **** 					ui2a(va_arg(va, unsigned int),10,0,bf);
+ 176:tinyprintf\API/printf.c **** 					putchw(putp,putf,w,lz,bf);
+ 177:tinyprintf\API/printf.c **** 					break;
+ 178:tinyprintf\API/printf.c **** 					}
+ 179:tinyprintf\API/printf.c **** 				case 'd' :  {
+ 180:tinyprintf\API/printf.c **** #ifdef 	PRINTF_LONG_SUPPORT
+ 181:tinyprintf\API/printf.c **** 					if (lng)
+ 182:tinyprintf\API/printf.c **** 						li2a(va_arg(va, unsigned long int),bf);
+ 183:tinyprintf\API/printf.c **** 					else
+ 184:tinyprintf\API/printf.c **** #endif
+ 185:tinyprintf\API/printf.c **** 					i2a(va_arg(va, int),bf);
+ 186:tinyprintf\API/printf.c **** 					putchw(putp,putf,w,lz,bf);
+ 187:tinyprintf\API/printf.c **** 					break;
+ 188:tinyprintf\API/printf.c **** 					}
+ 189:tinyprintf\API/printf.c **** 				case 'x': case 'X' : 
+ 190:tinyprintf\API/printf.c **** #ifdef 	PRINTF_LONG_SUPPORT
+ 191:tinyprintf\API/printf.c **** 					if (lng)
+ 192:tinyprintf\API/printf.c **** 						uli2a(va_arg(va, unsigned long int),16,(ch=='X'),bf);
+ 193:tinyprintf\API/printf.c **** 					else
+ 194:tinyprintf\API/printf.c **** #endif
+ 195:tinyprintf\API/printf.c **** 					ui2a(va_arg(va, unsigned int),16,(ch=='X'),bf);
+ 196:tinyprintf\API/printf.c **** 					putchw(putp,putf,w,lz,bf);
+ 197:tinyprintf\API/printf.c **** 					break;
+ 198:tinyprintf\API/printf.c **** 				case 'c' : 
+ 199:tinyprintf\API/printf.c **** 					putf(putp,(char)(va_arg(va, int)));
+ 200:tinyprintf\API/printf.c **** 					break;
+ 201:tinyprintf\API/printf.c **** 				case 's' : 
+ 202:tinyprintf\API/printf.c **** 					putchw(putp,putf,w,0,va_arg(va, char*));
+ 203:tinyprintf\API/printf.c **** 					break;
+ 204:tinyprintf\API/printf.c **** 				case '%' :
+ 205:tinyprintf\API/printf.c **** 					putf(putp,ch);
+ 206:tinyprintf\API/printf.c **** 				default:
+ 207:tinyprintf\API/printf.c **** 					break;
+ 208:tinyprintf\API/printf.c **** 				}
+ 209:tinyprintf\API/printf.c **** 			}
+ 210:tinyprintf\API/printf.c **** 		}
+ 211:tinyprintf\API/printf.c **** 	abort:;
+ 212:tinyprintf\API/printf.c **** 	}
+ 213:tinyprintf\API/printf.c **** 
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 13
+
+
+ 214:tinyprintf\API/printf.c **** 
+ 215:tinyprintf\API/printf.c **** void init_printf(void* putp,void (*putf) (void*,char))
+ 216:tinyprintf\API/printf.c **** 	{
+ 217:tinyprintf\API/printf.c **** 	stdout_putf=putf;
+ 218:tinyprintf\API/printf.c **** 	stdout_putp=putp;
+ 219:tinyprintf\API/printf.c **** 	}
+ 220:tinyprintf\API/printf.c **** 
+ 221:tinyprintf\API/printf.c **** void tfp_printf(char *fmt, ...)
+ 222:tinyprintf\API/printf.c **** 	{
+ 223:tinyprintf\API/printf.c **** 	va_list va;
+ 224:tinyprintf\API/printf.c **** 	va_start(va,fmt);
+ 225:tinyprintf\API/printf.c **** 	tfp_format(stdout_putp,stdout_putf,fmt,va);
+ 226:tinyprintf\API/printf.c **** 	va_end(va);
+ 227:tinyprintf\API/printf.c **** 	}
+ 228:tinyprintf\API/printf.c **** 
+ 229:tinyprintf\API/printf.c **** static void putcp(void* p,char c)
+ 230:tinyprintf\API/printf.c **** 	{
+ 464              		.loc 1 230 0
+ 465              		.cfi_startproc
+ 466              		@ args = 0, pretend = 0, frame = 0
+ 467              		@ frame_needed = 0, uses_anonymous_args = 0
+ 468              		@ link register save eliminated.
+ 469              	.LVL77:
+ 231:tinyprintf\API/printf.c **** 	*(*((char**)p))++ = c;
+ 470              		.loc 1 231 0
+ 471 0000 0368     		ldr	r3, [r0]
+ 472 0002 5A1C     		adds	r2, r3, #1
+ 473 0004 0260     		str	r2, [r0]
+ 474 0006 1970     		strb	r1, [r3]
+ 232:tinyprintf\API/printf.c **** 	}
+ 475              		.loc 1 232 0
+ 476              		@ sp needed
+ 477 0008 7047     		bx	lr
+ 478              		.cfi_endproc
+ 479              	.LFE8:
+ 480              		.size	putcp, .-putcp
+ 481 000a C046     		.section	.text.tfp_format,"ax",%progbits
+ 482              		.align	2
+ 483              		.global	tfp_format
+ 484              		.code	16
+ 485              		.thumb_func
+ 486              		.type	tfp_format, %function
+ 487              	tfp_format:
+ 488              	.LFB5:
+ 137:tinyprintf\API/printf.c **** 	char bf[12];
+ 489              		.loc 1 137 0
+ 490              		.cfi_startproc
+ 491              		@ args = 0, pretend = 0, frame = 24
+ 492              		@ frame_needed = 0, uses_anonymous_args = 0
+ 493              	.LVL78:
+ 494 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 495              		.cfi_def_cfa_offset 20
+ 496              		.cfi_offset 4, -20
+ 497              		.cfi_offset 5, -16
+ 498              		.cfi_offset 6, -12
+ 499              		.cfi_offset 7, -8
+ 500              		.cfi_offset 14, -4
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 14
+
+
+ 501 0002 4746     		mov	r7, r8
+ 502 0004 80B4     		push	{r7}
+ 503              		.cfi_def_cfa_offset 24
+ 504              		.cfi_offset 8, -24
+ 505 0006 88B0     		sub	sp, sp, #32
+ 506              		.cfi_def_cfa_offset 56
+ 507 0008 0400     		movs	r4, r0
+ 508 000a 0F00     		movs	r7, r1
+ 509 000c 0392     		str	r2, [sp, #12]
+ 510 000e 1D00     		movs	r5, r3
+ 143:tinyprintf\API/printf.c **** 		if (ch!='%') 
+ 511              		.loc 1 143 0
+ 512 0010 78E0     		b	.L33
+ 513              	.LVL79:
+ 514              	.L49:
+ 144:tinyprintf\API/printf.c **** 			putf(putp,ch);
+ 515              		.loc 1 144 0
+ 516 0012 2529     		cmp	r1, #37
+ 517 0014 02D0     		beq	.L34
+ 145:tinyprintf\API/printf.c **** 		else {
+ 518              		.loc 1 145 0
+ 519 0016 2000     		movs	r0, r4
+ 520 0018 B847     		blx	r7
+ 521              	.LVL80:
+ 522 001a 73E0     		b	.L33
+ 523              	.LVL81:
+ 524              	.L34:
+ 525              	.LBB3:
+ 151:tinyprintf\API/printf.c **** 			ch=*(fmt++);
+ 526              		.loc 1 151 0
+ 527 001c 0021     		movs	r1, #0
+ 528              	.LVL82:
+ 529 001e 0491     		str	r1, [sp, #16]
+ 530              	.LVL83:
+ 152:tinyprintf\API/printf.c **** 			if (ch=='0') {
+ 531              		.loc 1 152 0
+ 532 0020 511C     		adds	r1, r2, #1
+ 533 0022 0391     		str	r1, [sp, #12]
+ 534 0024 5878     		ldrb	r0, [r3, #1]
+ 535              	.LVL84:
+ 153:tinyprintf\API/printf.c **** 				ch=*(fmt++);
+ 536              		.loc 1 153 0
+ 537 0026 3028     		cmp	r0, #48
+ 538 0028 04D1     		bne	.L50
+ 154:tinyprintf\API/printf.c **** 				lz=1;
+ 539              		.loc 1 154 0
+ 540 002a 911C     		adds	r1, r2, #2
+ 541 002c 0391     		str	r1, [sp, #12]
+ 542 002e 5078     		ldrb	r0, [r2, #1]
+ 543              	.LVL85:
+ 155:tinyprintf\API/printf.c **** 				}
+ 544              		.loc 1 155 0
+ 545 0030 0126     		movs	r6, #1
+ 546 0032 00E0     		b	.L36
+ 547              	.LVL86:
+ 548              	.L50:
+ 147:tinyprintf\API/printf.c **** #ifdef 	PRINTF_LONG_SUPPORT
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 15
+
+
+ 549              		.loc 1 147 0
+ 550 0034 0026     		movs	r6, #0
+ 551              	.LVL87:
+ 552              	.L36:
+ 157:tinyprintf\API/printf.c **** 				ch=a2i(ch,&fmt,10,&w);
+ 553              		.loc 1 157 0
+ 554 0036 0300     		movs	r3, r0
+ 555 0038 303B     		subs	r3, r3, #48
+ 556 003a DBB2     		uxtb	r3, r3
+ 557 003c 092B     		cmp	r3, #9
+ 558 003e 04D8     		bhi	.L37
+ 158:tinyprintf\API/printf.c **** 				}
+ 559              		.loc 1 158 0
+ 560 0040 04AB     		add	r3, sp, #16
+ 561 0042 0A22     		movs	r2, #10
+ 562 0044 03A9     		add	r1, sp, #12
+ 563 0046 FFF7FEFF 		bl	a2i
+ 564              	.LVL88:
+ 565              	.L37:
+ 166:tinyprintf\API/printf.c **** 				case 0: 
+ 566              		.loc 1 166 0
+ 567 004a 6328     		cmp	r0, #99
+ 568 004c 48D0     		beq	.L39
+ 569 004e 06D8     		bhi	.L40
+ 570 0050 2528     		cmp	r0, #37
+ 571 0052 54D0     		beq	.L41
+ 572 0054 5828     		cmp	r0, #88
+ 573 0056 2FD0     		beq	.L42
+ 574 0058 0028     		cmp	r0, #0
+ 575 005a 5AD0     		beq	.L32
+ 576 005c 52E0     		b	.L33
+ 577              	.L40:
+ 578 005e 7328     		cmp	r0, #115
+ 579 0060 43D0     		beq	.L44
+ 580 0062 02D8     		bhi	.L45
+ 581 0064 6428     		cmp	r0, #100
+ 582 0066 17D0     		beq	.L46
+ 583 0068 4CE0     		b	.L33
+ 584              	.L45:
+ 585 006a 7528     		cmp	r0, #117
+ 586 006c 02D0     		beq	.L47
+ 587 006e 7828     		cmp	r0, #120
+ 588 0070 22D0     		beq	.L42
+ 589 0072 47E0     		b	.L33
+ 590              	.L47:
+ 175:tinyprintf\API/printf.c **** 					putchw(putp,putf,w,lz,bf);
+ 591              		.loc 1 175 0
+ 592 0074 05AA     		add	r2, sp, #20
+ 593 0076 9046     		mov	r8, r2
+ 594 0078 2868     		ldr	r0, [r5]
+ 595              	.LVL89:
+ 596 007a 0435     		adds	r5, r5, #4
+ 597              	.LVL90:
+ 598 007c 1300     		movs	r3, r2
+ 599 007e 0022     		movs	r2, #0
+ 600 0080 0A21     		movs	r1, #10
+ 601 0082 FFF7FEFF 		bl	ui2a
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 16
+
+
+ 602              	.LVL91:
+ 176:tinyprintf\API/printf.c **** 					break;
+ 603              		.loc 1 176 0
+ 604 0086 4346     		mov	r3, r8
+ 605 0088 0093     		str	r3, [sp]
+ 606 008a 3300     		movs	r3, r6
+ 607 008c 049A     		ldr	r2, [sp, #16]
+ 608 008e 3900     		movs	r1, r7
+ 609 0090 2000     		movs	r0, r4
+ 610 0092 FFF7FEFF 		bl	putchw
+ 611              	.LVL92:
+ 177:tinyprintf\API/printf.c **** 					}
+ 612              		.loc 1 177 0
+ 613 0096 35E0     		b	.L33
+ 614              	.LVL93:
+ 615              	.L46:
+ 185:tinyprintf\API/printf.c **** 					putchw(putp,putf,w,lz,bf);
+ 616              		.loc 1 185 0
+ 617 0098 05AA     		add	r2, sp, #20
+ 618 009a 9046     		mov	r8, r2
+ 619 009c 2868     		ldr	r0, [r5]
+ 620              	.LVL94:
+ 621 009e 0435     		adds	r5, r5, #4
+ 622              	.LVL95:
+ 623 00a0 1100     		movs	r1, r2
+ 624 00a2 FFF7FEFF 		bl	i2a
+ 625              	.LVL96:
+ 186:tinyprintf\API/printf.c **** 					break;
+ 626              		.loc 1 186 0
+ 627 00a6 4346     		mov	r3, r8
+ 628 00a8 0093     		str	r3, [sp]
+ 629 00aa 3300     		movs	r3, r6
+ 630 00ac 049A     		ldr	r2, [sp, #16]
+ 631 00ae 3900     		movs	r1, r7
+ 632 00b0 2000     		movs	r0, r4
+ 633 00b2 FFF7FEFF 		bl	putchw
+ 634              	.LVL97:
+ 187:tinyprintf\API/printf.c **** 					}
+ 635              		.loc 1 187 0
+ 636 00b6 25E0     		b	.L33
+ 637              	.LVL98:
+ 638              	.L42:
+ 195:tinyprintf\API/printf.c **** 					putchw(putp,putf,w,lz,bf);
+ 639              		.loc 1 195 0
+ 640 00b8 05AA     		add	r2, sp, #20
+ 641 00ba 9046     		mov	r8, r2
+ 642 00bc 5838     		subs	r0, r0, #88
+ 643              	.LVL99:
+ 644 00be 4242     		rsbs	r2, r0, #0
+ 645 00c0 4241     		adcs	r2, r2, r0
+ 646 00c2 2868     		ldr	r0, [r5]
+ 647              	.LVL100:
+ 648 00c4 0435     		adds	r5, r5, #4
+ 649              	.LVL101:
+ 650 00c6 4346     		mov	r3, r8
+ 651 00c8 1021     		movs	r1, #16
+ 652 00ca FFF7FEFF 		bl	ui2a
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 17
+
+
+ 653              	.LVL102:
+ 196:tinyprintf\API/printf.c **** 					break;
+ 654              		.loc 1 196 0
+ 655 00ce 4346     		mov	r3, r8
+ 656 00d0 0093     		str	r3, [sp]
+ 657 00d2 3300     		movs	r3, r6
+ 658 00d4 049A     		ldr	r2, [sp, #16]
+ 659 00d6 3900     		movs	r1, r7
+ 660 00d8 2000     		movs	r0, r4
+ 661 00da FFF7FEFF 		bl	putchw
+ 662              	.LVL103:
+ 197:tinyprintf\API/printf.c **** 				case 'c' : 
+ 663              		.loc 1 197 0
+ 664 00de 11E0     		b	.L33
+ 665              	.LVL104:
+ 666              	.L39:
+ 199:tinyprintf\API/printf.c **** 					break;
+ 667              		.loc 1 199 0
+ 668 00e0 2978     		ldrb	r1, [r5]
+ 669              	.LVL105:
+ 670 00e2 0435     		adds	r5, r5, #4
+ 671              	.LVL106:
+ 672 00e4 2000     		movs	r0, r4
+ 673              	.LVL107:
+ 674 00e6 B847     		blx	r7
+ 675              	.LVL108:
+ 200:tinyprintf\API/printf.c **** 				case 's' : 
+ 676              		.loc 1 200 0
+ 677 00e8 0CE0     		b	.L33
+ 678              	.LVL109:
+ 679              	.L44:
+ 202:tinyprintf\API/printf.c **** 					break;
+ 680              		.loc 1 202 0
+ 681 00ea 2B68     		ldr	r3, [r5]
+ 682 00ec 0093     		str	r3, [sp]
+ 683              	.LVL110:
+ 684 00ee 0435     		adds	r5, r5, #4
+ 685              	.LVL111:
+ 686 00f0 0023     		movs	r3, #0
+ 687 00f2 049A     		ldr	r2, [sp, #16]
+ 688 00f4 3900     		movs	r1, r7
+ 689 00f6 2000     		movs	r0, r4
+ 690              	.LVL112:
+ 691 00f8 FFF7FEFF 		bl	putchw
+ 692              	.LVL113:
+ 203:tinyprintf\API/printf.c **** 				case '%' :
+ 693              		.loc 1 203 0
+ 694 00fc 02E0     		b	.L33
+ 695              	.LVL114:
+ 696              	.L41:
+ 205:tinyprintf\API/printf.c **** 				default:
+ 697              		.loc 1 205 0
+ 698 00fe 0100     		movs	r1, r0
+ 699 0100 2000     		movs	r0, r4
+ 700              	.LVL115:
+ 701 0102 B847     		blx	r7
+ 702              	.LVL116:
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 18
+
+
+ 703              	.L33:
+ 704              	.LBE3:
+ 143:tinyprintf\API/printf.c **** 		if (ch!='%') 
+ 705              		.loc 1 143 0
+ 706 0104 039B     		ldr	r3, [sp, #12]
+ 707              	.LVL117:
+ 708 0106 5A1C     		adds	r2, r3, #1
+ 709 0108 0392     		str	r2, [sp, #12]
+ 710 010a 1978     		ldrb	r1, [r3]
+ 711              	.LVL118:
+ 712 010c 0029     		cmp	r1, #0
+ 713 010e 00D0     		beq	.LCB767
+ 714 0110 7FE7     		b	.L49	@long jump
+ 715              	.LCB767:
+ 716              	.L48:
+ 717              	.LVL119:
+ 718              	.L32:
+ 212:tinyprintf\API/printf.c **** 
+ 719              		.loc 1 212 0
+ 720 0112 08B0     		add	sp, sp, #32
+ 721              		@ sp needed
+ 722              	.LVL120:
+ 723              	.LVL121:
+ 724 0114 04BC     		pop	{r2}
+ 725 0116 9046     		mov	r8, r2
+ 726 0118 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 727              		.cfi_endproc
+ 728              	.LFE5:
+ 729              		.size	tfp_format, .-tfp_format
+ 730 011a C046     		.section	.text.init_printf,"ax",%progbits
+ 731              		.align	2
+ 732              		.global	init_printf
+ 733              		.code	16
+ 734              		.thumb_func
+ 735              		.type	init_printf, %function
+ 736              	init_printf:
+ 737              	.LFB6:
+ 216:tinyprintf\API/printf.c **** 	stdout_putf=putf;
+ 738              		.loc 1 216 0
+ 739              		.cfi_startproc
+ 740              		@ args = 0, pretend = 0, frame = 0
+ 741              		@ frame_needed = 0, uses_anonymous_args = 0
+ 742              		@ link register save eliminated.
+ 743              	.LVL122:
+ 217:tinyprintf\API/printf.c **** 	stdout_putp=putp;
+ 744              		.loc 1 217 0
+ 745 0000 014B     		ldr	r3, .L52
+ 746 0002 1960     		str	r1, [r3]
+ 218:tinyprintf\API/printf.c **** 	}
+ 747              		.loc 1 218 0
+ 748 0004 5860     		str	r0, [r3, #4]
+ 219:tinyprintf\API/printf.c **** 
+ 749              		.loc 1 219 0
+ 750              		@ sp needed
+ 751 0006 7047     		bx	lr
+ 752              	.L53:
+ 753              		.align	2
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 19
+
+
+ 754              	.L52:
+ 755 0008 00000000 		.word	.LANCHOR0
+ 756              		.cfi_endproc
+ 757              	.LFE6:
+ 758              		.size	init_printf, .-init_printf
+ 759              		.section	.text.tfp_printf,"ax",%progbits
+ 760              		.align	2
+ 761              		.global	tfp_printf
+ 762              		.code	16
+ 763              		.thumb_func
+ 764              		.type	tfp_printf, %function
+ 765              	tfp_printf:
+ 766              	.LFB7:
+ 222:tinyprintf\API/printf.c **** 	va_list va;
+ 767              		.loc 1 222 0
+ 768              		.cfi_startproc
+ 769              		@ args = 4, pretend = 16, frame = 8
+ 770              		@ frame_needed = 0, uses_anonymous_args = 1
+ 771              	.LVL123:
+ 772 0000 0FB4     		push	{r0, r1, r2, r3}
+ 773              		.cfi_def_cfa_offset 16
+ 774 0002 00B5     		push	{lr}
+ 775              		.cfi_def_cfa_offset 20
+ 776              		.cfi_offset 14, -20
+ 777 0004 83B0     		sub	sp, sp, #12
+ 778              		.cfi_def_cfa_offset 32
+ 779 0006 04AB     		add	r3, sp, #16
+ 780 0008 04CB     		ldmia	r3!, {r2}
+ 224:tinyprintf\API/printf.c **** 	tfp_format(stdout_putp,stdout_putf,fmt,va);
+ 781              		.loc 1 224 0
+ 782 000a 0193     		str	r3, [sp, #4]
+ 225:tinyprintf\API/printf.c **** 	va_end(va);
+ 783              		.loc 1 225 0
+ 784 000c 0448     		ldr	r0, .L55
+ 785 000e 0168     		ldr	r1, [r0]
+ 786 0010 4068     		ldr	r0, [r0, #4]
+ 787 0012 FFF7FEFF 		bl	tfp_format
+ 788              	.LVL124:
+ 227:tinyprintf\API/printf.c **** 
+ 789              		.loc 1 227 0
+ 790 0016 03B0     		add	sp, sp, #12
+ 791              		@ sp needed
+ 792 0018 08BC     		pop	{r3}
+ 793 001a 04B0     		add	sp, sp, #16
+ 794 001c 1847     		bx	r3
+ 795              	.L56:
+ 796 001e C046     		.align	2
+ 797              	.L55:
+ 798 0020 00000000 		.word	.LANCHOR0
+ 799              		.cfi_endproc
+ 800              	.LFE7:
+ 801              		.size	tfp_printf, .-tfp_printf
+ 802              		.section	.text.tfp_sprintf,"ax",%progbits
+ 803              		.align	2
+ 804              		.global	tfp_sprintf
+ 805              		.code	16
+ 806              		.thumb_func
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 20
+
+
+ 807              		.type	tfp_sprintf, %function
+ 808              	tfp_sprintf:
+ 809              	.LFB9:
+ 233:tinyprintf\API/printf.c **** 
+ 234:tinyprintf\API/printf.c **** 
+ 235:tinyprintf\API/printf.c **** 
+ 236:tinyprintf\API/printf.c **** void tfp_sprintf(char* s,char *fmt, ...)
+ 237:tinyprintf\API/printf.c **** 	{
+ 810              		.loc 1 237 0
+ 811              		.cfi_startproc
+ 812              		@ args = 4, pretend = 12, frame = 16
+ 813              		@ frame_needed = 0, uses_anonymous_args = 1
+ 814              	.LVL125:
+ 815 0000 0EB4     		push	{r1, r2, r3}
+ 816              		.cfi_def_cfa_offset 12
+ 817 0002 00B5     		push	{lr}
+ 818              		.cfi_def_cfa_offset 16
+ 819              		.cfi_offset 14, -16
+ 820 0004 84B0     		sub	sp, sp, #16
+ 821              		.cfi_def_cfa_offset 32
+ 822 0006 0190     		str	r0, [sp, #4]
+ 823 0008 05AB     		add	r3, sp, #20
+ 824 000a 04CB     		ldmia	r3!, {r2}
+ 238:tinyprintf\API/printf.c **** 	va_list va;
+ 239:tinyprintf\API/printf.c **** 	va_start(va,fmt);
+ 825              		.loc 1 239 0
+ 826 000c 0393     		str	r3, [sp, #12]
+ 240:tinyprintf\API/printf.c **** 	tfp_format(&s,putcp,fmt,va);
+ 827              		.loc 1 240 0
+ 828 000e 0649     		ldr	r1, .L58
+ 829 0010 01A8     		add	r0, sp, #4
+ 830              	.LVL126:
+ 831 0012 FFF7FEFF 		bl	tfp_format
+ 832              	.LVL127:
+ 241:tinyprintf\API/printf.c **** 	putcp(&s,0);
+ 833              		.loc 1 241 0
+ 834 0016 0021     		movs	r1, #0
+ 835 0018 01A8     		add	r0, sp, #4
+ 836              	.LVL128:
+ 837 001a FFF7FEFF 		bl	putcp
+ 838              	.LVL129:
+ 242:tinyprintf\API/printf.c **** 	va_end(va);
+ 243:tinyprintf\API/printf.c **** 	}
+ 839              		.loc 1 243 0
+ 840 001e 04B0     		add	sp, sp, #16
+ 841              		@ sp needed
+ 842 0020 08BC     		pop	{r3}
+ 843 0022 03B0     		add	sp, sp, #12
+ 844 0024 1847     		bx	r3
+ 845              	.L59:
+ 846 0026 C046     		.align	2
+ 847              	.L58:
+ 848 0028 00000000 		.word	putcp
+ 849              		.cfi_endproc
+ 850              	.LFE9:
+ 851              		.size	tfp_sprintf, .-tfp_sprintf
+ 852              		.bss
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 21
+
+
+ 853              		.align	2
+ 854              		.set	.LANCHOR0,. + 0
+ 855              		.type	stdout_putf, %object
+ 856              		.size	stdout_putf, 4
+ 857              	stdout_putf:
+ 858 0000 00000000 		.space	4
+ 859              		.type	stdout_putp, %object
+ 860              		.size	stdout_putp, 4
+ 861              	stdout_putp:
+ 862 0004 00000000 		.space	4
+ 863              		.text
+ 864              	.Letext0:
+ 865              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 866              		.file 3 "<built-in>"
+ 867              		.section	.debug_info,"",%progbits
+ 868              	.Ldebug_info0:
+ 869 0000 E4050000 		.4byte	0x5e4
+ 870 0004 0400     		.2byte	0x4
+ 871 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 872 000a 04       		.byte	0x4
+ 873 000b 01       		.uleb128 0x1
+ 874 000c B8000000 		.4byte	.LASF20
+ 875 0010 0C       		.byte	0xc
+ 876 0011 80010000 		.4byte	.LASF21
+ 877 0015 74000000 		.4byte	.LASF22
+ 878 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 879 001d 00000000 		.4byte	0
+ 880 0021 00000000 		.4byte	.Ldebug_line0
+ 881 0025 02       		.uleb128 0x2
+ 882 0026 05000000 		.4byte	.LASF0
+ 883 002a 02       		.byte	0x2
+ 884 002b 28       		.byte	0x28
+ 885 002c 30000000 		.4byte	0x30
+ 886 0030 03       		.uleb128 0x3
+ 887 0031 5A010000 		.4byte	.LASF23
+ 888 0035 04       		.byte	0x4
+ 889 0036 03       		.byte	0x3
+ 890 0037 00       		.byte	0
+ 891 0038 47000000 		.4byte	0x47
+ 892 003c 04       		.uleb128 0x4
+ 893 003d B3000000 		.4byte	.LASF24
+ 894 0041 47000000 		.4byte	0x47
+ 895 0045 00       		.byte	0
+ 896 0046 00       		.byte	0
+ 897 0047 05       		.uleb128 0x5
+ 898 0048 04       		.byte	0x4
+ 899 0049 02       		.uleb128 0x2
+ 900 004a 31000000 		.4byte	.LASF1
+ 901 004e 02       		.byte	0x2
+ 902 004f 62       		.byte	0x62
+ 903 0050 25000000 		.4byte	0x25
+ 904 0054 02       		.uleb128 0x2
+ 905 0055 14000000 		.4byte	.LASF2
+ 906 0059 01       		.byte	0x1
+ 907 005a 22       		.byte	0x22
+ 908 005b 5F000000 		.4byte	0x5f
+ 909 005f 06       		.uleb128 0x6
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 22
+
+
+ 910 0060 04       		.byte	0x4
+ 911 0061 65000000 		.4byte	0x65
+ 912 0065 07       		.uleb128 0x7
+ 913 0066 75000000 		.4byte	0x75
+ 914 006a 08       		.uleb128 0x8
+ 915 006b 47000000 		.4byte	0x47
+ 916 006f 08       		.uleb128 0x8
+ 917 0070 75000000 		.4byte	0x75
+ 918 0074 00       		.byte	0
+ 919 0075 09       		.uleb128 0x9
+ 920 0076 01       		.byte	0x1
+ 921 0077 08       		.byte	0x8
+ 922 0078 6F000000 		.4byte	.LASF4
+ 923 007c 0A       		.uleb128 0xa
+ 924 007d 64010000 		.4byte	.LASF6
+ 925 0081 01       		.byte	0x1
+ 926 0082 46       		.byte	0x46
+ 927 0083 00000000 		.4byte	.LFB0
+ 928 0087 8E000000 		.4byte	.LFE0-.LFB0
+ 929 008b 01       		.uleb128 0x1
+ 930 008c 9C       		.byte	0x9c
+ 931 008d FF000000 		.4byte	0xff
+ 932 0091 0B       		.uleb128 0xb
+ 933 0092 6E756D00 		.ascii	"num\000"
+ 934 0096 01       		.byte	0x1
+ 935 0097 46       		.byte	0x46
+ 936 0098 FF000000 		.4byte	0xff
+ 937 009c 00000000 		.4byte	.LLST0
+ 938 00a0 0C       		.uleb128 0xc
+ 939 00a1 26000000 		.4byte	.LASF3
+ 940 00a5 01       		.byte	0x1
+ 941 00a6 46       		.byte	0x46
+ 942 00a7 FF000000 		.4byte	0xff
+ 943 00ab 42000000 		.4byte	.LLST1
+ 944 00af 0B       		.uleb128 0xb
+ 945 00b0 756300   		.ascii	"uc\000"
+ 946 00b3 01       		.byte	0x1
+ 947 00b4 46       		.byte	0x46
+ 948 00b5 06010000 		.4byte	0x106
+ 949 00b9 6E000000 		.4byte	.LLST2
+ 950 00bd 0B       		.uleb128 0xb
+ 951 00be 626600   		.ascii	"bf\000"
+ 952 00c1 01       		.byte	0x1
+ 953 00c2 46       		.byte	0x46
+ 954 00c3 0D010000 		.4byte	0x10d
+ 955 00c7 C6000000 		.4byte	.LLST3
+ 956 00cb 0D       		.uleb128 0xd
+ 957 00cc 6E00     		.ascii	"n\000"
+ 958 00ce 01       		.byte	0x1
+ 959 00cf 48       		.byte	0x48
+ 960 00d0 06010000 		.4byte	0x106
+ 961 00d4 FA000000 		.4byte	.LLST4
+ 962 00d8 0D       		.uleb128 0xd
+ 963 00d9 6400     		.ascii	"d\000"
+ 964 00db 01       		.byte	0x1
+ 965 00dc 49       		.byte	0x49
+ 966 00dd FF000000 		.4byte	0xff
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 23
+
+
+ 967 00e1 2F010000 		.4byte	.LLST5
+ 968 00e5 0E       		.uleb128 0xe
+ 969 00e6 2A000000 		.4byte	.LBB2
+ 970 00ea 52000000 		.4byte	.LBE2-.LBB2
+ 971 00ee 0D       		.uleb128 0xd
+ 972 00ef 64677400 		.ascii	"dgt\000"
+ 973 00f3 01       		.byte	0x1
+ 974 00f4 4D       		.byte	0x4d
+ 975 00f5 06010000 		.4byte	0x106
+ 976 00f9 64010000 		.4byte	.LLST6
+ 977 00fd 00       		.byte	0
+ 978 00fe 00       		.byte	0
+ 979 00ff 09       		.uleb128 0x9
+ 980 0100 04       		.byte	0x4
+ 981 0101 07       		.byte	0x7
+ 982 0102 5C000000 		.4byte	.LASF5
+ 983 0106 0F       		.uleb128 0xf
+ 984 0107 04       		.byte	0x4
+ 985 0108 05       		.byte	0x5
+ 986 0109 696E7400 		.ascii	"int\000"
+ 987 010d 06       		.uleb128 0x6
+ 988 010e 04       		.byte	0x4
+ 989 010f 75000000 		.4byte	0x75
+ 990 0113 10       		.uleb128 0x10
+ 991 0114 69326100 		.ascii	"i2a\000"
+ 992 0118 01       		.byte	0x1
+ 993 0119 58       		.byte	0x58
+ 994 011a 00000000 		.4byte	.LFB1
+ 995 011e 1A000000 		.4byte	.LFE1-.LFB1
+ 996 0122 01       		.uleb128 0x1
+ 997 0123 9C       		.byte	0x9c
+ 998 0124 5A010000 		.4byte	0x15a
+ 999 0128 0B       		.uleb128 0xb
+ 1000 0129 6E756D00 		.ascii	"num\000"
+ 1001 012d 01       		.byte	0x1
+ 1002 012e 58       		.byte	0x58
+ 1003 012f 06010000 		.4byte	0x106
+ 1004 0133 8E010000 		.4byte	.LLST7
+ 1005 0137 0B       		.uleb128 0xb
+ 1006 0138 626600   		.ascii	"bf\000"
+ 1007 013b 01       		.byte	0x1
+ 1008 013c 58       		.byte	0x58
+ 1009 013d 0D010000 		.4byte	0x10d
+ 1010 0141 AC010000 		.4byte	.LLST8
+ 1011 0145 11       		.uleb128 0x11
+ 1012 0146 18000000 		.4byte	.LVL32
+ 1013 014a 7C000000 		.4byte	0x7c
+ 1014 014e 12       		.uleb128 0x12
+ 1015 014f 01       		.uleb128 0x1
+ 1016 0150 51       		.byte	0x51
+ 1017 0151 01       		.uleb128 0x1
+ 1018 0152 3A       		.byte	0x3a
+ 1019 0153 12       		.uleb128 0x12
+ 1020 0154 01       		.uleb128 0x1
+ 1021 0155 52       		.byte	0x52
+ 1022 0156 01       		.uleb128 0x1
+ 1023 0157 30       		.byte	0x30
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 24
+
+
+ 1024 0158 00       		.byte	0
+ 1025 0159 00       		.byte	0
+ 1026 015a 13       		.uleb128 0x13
+ 1027 015b 61326400 		.ascii	"a2d\000"
+ 1028 015f 01       		.byte	0x1
+ 1029 0160 61       		.byte	0x61
+ 1030 0161 06010000 		.4byte	0x106
+ 1031 0165 00000000 		.4byte	.LFB2
+ 1032 0169 30000000 		.4byte	.LFE2-.LFB2
+ 1033 016d 01       		.uleb128 0x1
+ 1034 016e 9C       		.byte	0x9c
+ 1035 016f 82010000 		.4byte	0x182
+ 1036 0173 0B       		.uleb128 0xb
+ 1037 0174 636800   		.ascii	"ch\000"
+ 1038 0177 01       		.byte	0x1
+ 1039 0178 61       		.byte	0x61
+ 1040 0179 75000000 		.4byte	0x75
+ 1041 017d D7010000 		.4byte	.LLST9
+ 1042 0181 00       		.byte	0
+ 1043 0182 13       		.uleb128 0x13
+ 1044 0183 61326900 		.ascii	"a2i\000"
+ 1045 0187 01       		.byte	0x1
+ 1046 0188 6C       		.byte	0x6c
+ 1047 0189 75000000 		.4byte	0x75
+ 1048 018d 00000000 		.4byte	.LFB3
+ 1049 0191 3E000000 		.4byte	.LFE3-.LFB3
+ 1050 0195 01       		.uleb128 0x1
+ 1051 0196 9C       		.byte	0x9c
+ 1052 0197 12020000 		.4byte	0x212
+ 1053 019b 0B       		.uleb128 0xb
+ 1054 019c 636800   		.ascii	"ch\000"
+ 1055 019f 01       		.byte	0x1
+ 1056 01a0 6C       		.byte	0x6c
+ 1057 01a1 75000000 		.4byte	0x75
+ 1058 01a5 43020000 		.4byte	.LLST10
+ 1059 01a9 0B       		.uleb128 0xb
+ 1060 01aa 73726300 		.ascii	"src\000"
+ 1061 01ae 01       		.byte	0x1
+ 1062 01af 6C       		.byte	0x6c
+ 1063 01b0 12020000 		.4byte	0x212
+ 1064 01b4 61020000 		.4byte	.LLST11
+ 1065 01b8 0C       		.uleb128 0xc
+ 1066 01b9 26000000 		.4byte	.LASF3
+ 1067 01bd 01       		.byte	0x1
+ 1068 01be 6C       		.byte	0x6c
+ 1069 01bf 06010000 		.4byte	0x106
+ 1070 01c3 8D020000 		.4byte	.LLST12
+ 1071 01c7 0C       		.uleb128 0xc
+ 1072 01c8 69010000 		.4byte	.LASF7
+ 1073 01cc 01       		.byte	0x1
+ 1074 01cd 6C       		.byte	0x6c
+ 1075 01ce 18020000 		.4byte	0x218
+ 1076 01d2 B9020000 		.4byte	.LLST13
+ 1077 01d6 0D       		.uleb128 0xd
+ 1078 01d7 7000     		.ascii	"p\000"
+ 1079 01d9 01       		.byte	0x1
+ 1080 01da 6E       		.byte	0x6e
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 25
+
+
+ 1081 01db 0D010000 		.4byte	0x10d
+ 1082 01df E2020000 		.4byte	.LLST14
+ 1083 01e3 0D       		.uleb128 0xd
+ 1084 01e4 6E756D00 		.ascii	"num\000"
+ 1085 01e8 01       		.byte	0x1
+ 1086 01e9 6F       		.byte	0x6f
+ 1087 01ea 06010000 		.4byte	0x106
+ 1088 01ee 0D030000 		.4byte	.LLST15
+ 1089 01f2 14       		.uleb128 0x14
+ 1090 01f3 69000000 		.4byte	.LASF8
+ 1091 01f7 01       		.byte	0x1
+ 1092 01f8 70       		.byte	0x70
+ 1093 01f9 06010000 		.4byte	0x106
+ 1094 01fd 43030000 		.4byte	.LLST16
+ 1095 0201 11       		.uleb128 0x11
+ 1096 0202 28000000 		.4byte	.LVL48
+ 1097 0206 5A010000 		.4byte	0x15a
+ 1098 020a 12       		.uleb128 0x12
+ 1099 020b 01       		.uleb128 0x1
+ 1100 020c 50       		.byte	0x50
+ 1101 020d 02       		.uleb128 0x2
+ 1102 020e 76       		.byte	0x76
+ 1103 020f 00       		.sleb128 0
+ 1104 0210 00       		.byte	0
+ 1105 0211 00       		.byte	0
+ 1106 0212 06       		.uleb128 0x6
+ 1107 0213 04       		.byte	0x4
+ 1108 0214 0D010000 		.4byte	0x10d
+ 1109 0218 06       		.uleb128 0x6
+ 1110 0219 04       		.byte	0x4
+ 1111 021a 06010000 		.4byte	0x106
+ 1112 021e 15       		.uleb128 0x15
+ 1113 021f 6E010000 		.4byte	.LASF9
+ 1114 0223 01       		.byte	0x1
+ 1115 0224 7B       		.byte	0x7b
+ 1116 0225 00000000 		.4byte	.LFB4
+ 1117 0229 50000000 		.4byte	.LFE4-.LFB4
+ 1118 022d 01       		.uleb128 0x1
+ 1119 022e 9C       		.byte	0x9c
+ 1120 022f C6020000 		.4byte	0x2c6
+ 1121 0233 0C       		.uleb128 0xc
+ 1122 0234 75010000 		.4byte	.LASF10
+ 1123 0238 01       		.byte	0x1
+ 1124 0239 7B       		.byte	0x7b
+ 1125 023a 47000000 		.4byte	0x47
+ 1126 023e 61030000 		.4byte	.LLST17
+ 1127 0242 0C       		.uleb128 0xc
+ 1128 0243 00000000 		.4byte	.LASF11
+ 1129 0247 01       		.byte	0x1
+ 1130 0248 7B       		.byte	0x7b
+ 1131 0249 54000000 		.4byte	0x54
+ 1132 024d 8D030000 		.4byte	.LLST18
+ 1133 0251 0B       		.uleb128 0xb
+ 1134 0252 6E00     		.ascii	"n\000"
+ 1135 0254 01       		.byte	0x1
+ 1136 0255 7B       		.byte	0x7b
+ 1137 0256 06010000 		.4byte	0x106
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 26
+
+
+ 1138 025a B9030000 		.4byte	.LLST19
+ 1139 025e 0B       		.uleb128 0xb
+ 1140 025f 7A00     		.ascii	"z\000"
+ 1141 0261 01       		.byte	0x1
+ 1142 0262 7B       		.byte	0x7b
+ 1143 0263 75000000 		.4byte	0x75
+ 1144 0267 F8030000 		.4byte	.LLST20
+ 1145 026b 0B       		.uleb128 0xb
+ 1146 026c 626600   		.ascii	"bf\000"
+ 1147 026f 01       		.byte	0x1
+ 1148 0270 7B       		.byte	0x7b
+ 1149 0271 0D010000 		.4byte	0x10d
+ 1150 0275 32040000 		.4byte	.LLST21
+ 1151 0279 16       		.uleb128 0x16
+ 1152 027a 666300   		.ascii	"fc\000"
+ 1153 027d 01       		.byte	0x1
+ 1154 027e 7D       		.byte	0x7d
+ 1155 027f 75000000 		.4byte	0x75
+ 1156 0283 02       		.uleb128 0x2
+ 1157 0284 91       		.byte	0x91
+ 1158 0285 64       		.sleb128 -28
+ 1159 0286 0D       		.uleb128 0xd
+ 1160 0287 636800   		.ascii	"ch\000"
+ 1161 028a 01       		.byte	0x1
+ 1162 028b 7E       		.byte	0x7e
+ 1163 028c 75000000 		.4byte	0x75
+ 1164 0290 67040000 		.4byte	.LLST22
+ 1165 0294 0D       		.uleb128 0xd
+ 1166 0295 7000     		.ascii	"p\000"
+ 1167 0297 01       		.byte	0x1
+ 1168 0298 7F       		.byte	0x7f
+ 1169 0299 0D010000 		.4byte	0x10d
+ 1170 029d 85040000 		.4byte	.LLST23
+ 1171 02a1 17       		.uleb128 0x17
+ 1172 02a2 34000000 		.4byte	.LVL66
+ 1173 02a6 B9020000 		.4byte	0x2b9
+ 1174 02aa 12       		.uleb128 0x12
+ 1175 02ab 01       		.uleb128 0x1
+ 1176 02ac 50       		.byte	0x50
+ 1177 02ad 02       		.uleb128 0x2
+ 1178 02ae 75       		.byte	0x75
+ 1179 02af 00       		.sleb128 0
+ 1180 02b0 12       		.uleb128 0x12
+ 1181 02b1 01       		.uleb128 0x1
+ 1182 02b2 51       		.byte	0x51
+ 1183 02b3 04       		.uleb128 0x4
+ 1184 02b4 91       		.byte	0x91
+ 1185 02b5 64       		.sleb128 -28
+ 1186 02b6 94       		.byte	0x94
+ 1187 02b7 01       		.byte	0x1
+ 1188 02b8 00       		.byte	0
+ 1189 02b9 18       		.uleb128 0x18
+ 1190 02ba 42000000 		.4byte	.LVL70
+ 1191 02be 12       		.uleb128 0x12
+ 1192 02bf 01       		.uleb128 0x1
+ 1193 02c0 50       		.byte	0x50
+ 1194 02c1 02       		.uleb128 0x2
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 27
+
+
+ 1195 02c2 75       		.byte	0x75
+ 1196 02c3 00       		.sleb128 0
+ 1197 02c4 00       		.byte	0
+ 1198 02c5 00       		.byte	0
+ 1199 02c6 15       		.uleb128 0x15
+ 1200 02c7 2B000000 		.4byte	.LASF12
+ 1201 02cb 01       		.byte	0x1
+ 1202 02cc E5       		.byte	0xe5
+ 1203 02cd 00000000 		.4byte	.LFB8
+ 1204 02d1 0A000000 		.4byte	.LFE8-.LFB8
+ 1205 02d5 01       		.uleb128 0x1
+ 1206 02d6 9C       		.byte	0x9c
+ 1207 02d7 F2020000 		.4byte	0x2f2
+ 1208 02db 19       		.uleb128 0x19
+ 1209 02dc 7000     		.ascii	"p\000"
+ 1210 02de 01       		.byte	0x1
+ 1211 02df E5       		.byte	0xe5
+ 1212 02e0 47000000 		.4byte	0x47
+ 1213 02e4 01       		.uleb128 0x1
+ 1214 02e5 50       		.byte	0x50
+ 1215 02e6 19       		.uleb128 0x19
+ 1216 02e7 6300     		.ascii	"c\000"
+ 1217 02e9 01       		.byte	0x1
+ 1218 02ea E5       		.byte	0xe5
+ 1219 02eb 75000000 		.4byte	0x75
+ 1220 02ef 01       		.uleb128 0x1
+ 1221 02f0 51       		.byte	0x51
+ 1222 02f1 00       		.byte	0
+ 1223 02f2 1A       		.uleb128 0x1a
+ 1224 02f3 39000000 		.4byte	.LASF14
+ 1225 02f7 01       		.byte	0x1
+ 1226 02f8 88       		.byte	0x88
+ 1227 02f9 00000000 		.4byte	.LFB5
+ 1228 02fd 1A010000 		.4byte	.LFE5-.LFB5
+ 1229 0301 01       		.uleb128 0x1
+ 1230 0302 9C       		.byte	0x9c
+ 1231 0303 B7040000 		.4byte	0x4b7
+ 1232 0307 0C       		.uleb128 0xc
+ 1233 0308 75010000 		.4byte	.LASF10
+ 1234 030c 01       		.byte	0x1
+ 1235 030d 88       		.byte	0x88
+ 1236 030e 47000000 		.4byte	0x47
+ 1237 0312 B9040000 		.4byte	.LLST24
+ 1238 0316 0C       		.uleb128 0xc
+ 1239 0317 00000000 		.4byte	.LASF11
+ 1240 031b 01       		.byte	0x1
+ 1241 031c 88       		.byte	0x88
+ 1242 031d 54000000 		.4byte	0x54
+ 1243 0321 E5040000 		.4byte	.LLST25
+ 1244 0325 0B       		.uleb128 0xb
+ 1245 0326 666D7400 		.ascii	"fmt\000"
+ 1246 032a 01       		.byte	0x1
+ 1247 032b 88       		.byte	0x88
+ 1248 032c 0D010000 		.4byte	0x10d
+ 1249 0330 11050000 		.4byte	.LLST26
+ 1250 0334 0B       		.uleb128 0xb
+ 1251 0335 766100   		.ascii	"va\000"
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 28
+
+
+ 1252 0338 01       		.byte	0x1
+ 1253 0339 88       		.byte	0x88
+ 1254 033a 49000000 		.4byte	0x49
+ 1255 033e 32050000 		.4byte	.LLST27
+ 1256 0342 16       		.uleb128 0x16
+ 1257 0343 626600   		.ascii	"bf\000"
+ 1258 0346 01       		.byte	0x1
+ 1259 0347 8A       		.byte	0x8a
+ 1260 0348 B7040000 		.4byte	0x4b7
+ 1261 034c 02       		.uleb128 0x2
+ 1262 034d 91       		.byte	0x91
+ 1263 034e 5C       		.sleb128 -36
+ 1264 034f 0D       		.uleb128 0xd
+ 1265 0350 636800   		.ascii	"ch\000"
+ 1266 0353 01       		.byte	0x1
+ 1267 0354 8C       		.byte	0x8c
+ 1268 0355 75000000 		.4byte	0x75
+ 1269 0359 87050000 		.4byte	.LLST28
+ 1270 035d 1B       		.uleb128 0x1b
+ 1271 035e 7A010000 		.4byte	.LASF25
+ 1272 0362 01       		.byte	0x1
+ 1273 0363 D3       		.byte	0xd3
+ 1274 0364 12010000 		.4byte	.L48
+ 1275 0368 1C       		.uleb128 0x1c
+ 1276 0369 1C000000 		.4byte	.LBB3
+ 1277 036d E8000000 		.4byte	.LBE3-.LBB3
+ 1278 0371 AA040000 		.4byte	0x4aa
+ 1279 0375 0D       		.uleb128 0xd
+ 1280 0376 6C7A00   		.ascii	"lz\000"
+ 1281 0379 01       		.byte	0x1
+ 1282 037a 93       		.byte	0x93
+ 1283 037b 75000000 		.4byte	0x75
+ 1284 037f 09060000 		.4byte	.LLST29
+ 1285 0383 16       		.uleb128 0x16
+ 1286 0384 7700     		.ascii	"w\000"
+ 1287 0386 01       		.byte	0x1
+ 1288 0387 97       		.byte	0x97
+ 1289 0388 06010000 		.4byte	0x106
+ 1290 038c 02       		.uleb128 0x2
+ 1291 038d 91       		.byte	0x91
+ 1292 038e 58       		.sleb128 -40
+ 1293 038f 1D       		.uleb128 0x1d
+ 1294 0390 4A000000 		.4byte	.LVL88
+ 1295 0394 82010000 		.4byte	0x182
+ 1296 0398 AE030000 		.4byte	0x3ae
+ 1297 039c 12       		.uleb128 0x12
+ 1298 039d 01       		.uleb128 0x1
+ 1299 039e 51       		.byte	0x51
+ 1300 039f 02       		.uleb128 0x2
+ 1301 03a0 91       		.byte	0x91
+ 1302 03a1 54       		.sleb128 -44
+ 1303 03a2 12       		.uleb128 0x12
+ 1304 03a3 01       		.uleb128 0x1
+ 1305 03a4 52       		.byte	0x52
+ 1306 03a5 01       		.uleb128 0x1
+ 1307 03a6 3A       		.byte	0x3a
+ 1308 03a7 12       		.uleb128 0x12
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 29
+
+
+ 1309 03a8 01       		.uleb128 0x1
+ 1310 03a9 53       		.byte	0x53
+ 1311 03aa 02       		.uleb128 0x2
+ 1312 03ab 91       		.byte	0x91
+ 1313 03ac 58       		.sleb128 -40
+ 1314 03ad 00       		.byte	0
+ 1315 03ae 1D       		.uleb128 0x1d
+ 1316 03af 86000000 		.4byte	.LVL91
+ 1317 03b3 7C000000 		.4byte	0x7c
+ 1318 03b7 CC030000 		.4byte	0x3cc
+ 1319 03bb 12       		.uleb128 0x12
+ 1320 03bc 01       		.uleb128 0x1
+ 1321 03bd 51       		.byte	0x51
+ 1322 03be 01       		.uleb128 0x1
+ 1323 03bf 3A       		.byte	0x3a
+ 1324 03c0 12       		.uleb128 0x12
+ 1325 03c1 01       		.uleb128 0x1
+ 1326 03c2 52       		.byte	0x52
+ 1327 03c3 01       		.uleb128 0x1
+ 1328 03c4 30       		.byte	0x30
+ 1329 03c5 12       		.uleb128 0x12
+ 1330 03c6 01       		.uleb128 0x1
+ 1331 03c7 53       		.byte	0x53
+ 1332 03c8 02       		.uleb128 0x2
+ 1333 03c9 78       		.byte	0x78
+ 1334 03ca 00       		.sleb128 0
+ 1335 03cb 00       		.byte	0
+ 1336 03cc 1D       		.uleb128 0x1d
+ 1337 03cd 96000000 		.4byte	.LVL92
+ 1338 03d1 1E020000 		.4byte	0x21e
+ 1339 03d5 F3030000 		.4byte	0x3f3
+ 1340 03d9 12       		.uleb128 0x12
+ 1341 03da 01       		.uleb128 0x1
+ 1342 03db 50       		.byte	0x50
+ 1343 03dc 02       		.uleb128 0x2
+ 1344 03dd 74       		.byte	0x74
+ 1345 03de 00       		.sleb128 0
+ 1346 03df 12       		.uleb128 0x12
+ 1347 03e0 01       		.uleb128 0x1
+ 1348 03e1 51       		.byte	0x51
+ 1349 03e2 02       		.uleb128 0x2
+ 1350 03e3 77       		.byte	0x77
+ 1351 03e4 00       		.sleb128 0
+ 1352 03e5 12       		.uleb128 0x12
+ 1353 03e6 01       		.uleb128 0x1
+ 1354 03e7 53       		.byte	0x53
+ 1355 03e8 02       		.uleb128 0x2
+ 1356 03e9 76       		.byte	0x76
+ 1357 03ea 00       		.sleb128 0
+ 1358 03eb 12       		.uleb128 0x12
+ 1359 03ec 02       		.uleb128 0x2
+ 1360 03ed 7D       		.byte	0x7d
+ 1361 03ee 00       		.sleb128 0
+ 1362 03ef 02       		.uleb128 0x2
+ 1363 03f0 78       		.byte	0x78
+ 1364 03f1 00       		.sleb128 0
+ 1365 03f2 00       		.byte	0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 30
+
+
+ 1366 03f3 1D       		.uleb128 0x1d
+ 1367 03f4 A6000000 		.4byte	.LVL96
+ 1368 03f8 13010000 		.4byte	0x113
+ 1369 03fc 07040000 		.4byte	0x407
+ 1370 0400 12       		.uleb128 0x12
+ 1371 0401 01       		.uleb128 0x1
+ 1372 0402 51       		.byte	0x51
+ 1373 0403 02       		.uleb128 0x2
+ 1374 0404 78       		.byte	0x78
+ 1375 0405 00       		.sleb128 0
+ 1376 0406 00       		.byte	0
+ 1377 0407 1D       		.uleb128 0x1d
+ 1378 0408 B6000000 		.4byte	.LVL97
+ 1379 040c 1E020000 		.4byte	0x21e
+ 1380 0410 2E040000 		.4byte	0x42e
+ 1381 0414 12       		.uleb128 0x12
+ 1382 0415 01       		.uleb128 0x1
+ 1383 0416 50       		.byte	0x50
+ 1384 0417 02       		.uleb128 0x2
+ 1385 0418 74       		.byte	0x74
+ 1386 0419 00       		.sleb128 0
+ 1387 041a 12       		.uleb128 0x12
+ 1388 041b 01       		.uleb128 0x1
+ 1389 041c 51       		.byte	0x51
+ 1390 041d 02       		.uleb128 0x2
+ 1391 041e 77       		.byte	0x77
+ 1392 041f 00       		.sleb128 0
+ 1393 0420 12       		.uleb128 0x12
+ 1394 0421 01       		.uleb128 0x1
+ 1395 0422 53       		.byte	0x53
+ 1396 0423 02       		.uleb128 0x2
+ 1397 0424 76       		.byte	0x76
+ 1398 0425 00       		.sleb128 0
+ 1399 0426 12       		.uleb128 0x12
+ 1400 0427 02       		.uleb128 0x2
+ 1401 0428 7D       		.byte	0x7d
+ 1402 0429 00       		.sleb128 0
+ 1403 042a 02       		.uleb128 0x2
+ 1404 042b 78       		.byte	0x78
+ 1405 042c 00       		.sleb128 0
+ 1406 042d 00       		.byte	0
+ 1407 042e 1D       		.uleb128 0x1d
+ 1408 042f CE000000 		.4byte	.LVL102
+ 1409 0433 7C000000 		.4byte	0x7c
+ 1410 0437 47040000 		.4byte	0x447
+ 1411 043b 12       		.uleb128 0x12
+ 1412 043c 01       		.uleb128 0x1
+ 1413 043d 51       		.byte	0x51
+ 1414 043e 01       		.uleb128 0x1
+ 1415 043f 40       		.byte	0x40
+ 1416 0440 12       		.uleb128 0x12
+ 1417 0441 01       		.uleb128 0x1
+ 1418 0442 53       		.byte	0x53
+ 1419 0443 02       		.uleb128 0x2
+ 1420 0444 78       		.byte	0x78
+ 1421 0445 00       		.sleb128 0
+ 1422 0446 00       		.byte	0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 31
+
+
+ 1423 0447 1D       		.uleb128 0x1d
+ 1424 0448 DE000000 		.4byte	.LVL103
+ 1425 044c 1E020000 		.4byte	0x21e
+ 1426 0450 6E040000 		.4byte	0x46e
+ 1427 0454 12       		.uleb128 0x12
+ 1428 0455 01       		.uleb128 0x1
+ 1429 0456 50       		.byte	0x50
+ 1430 0457 02       		.uleb128 0x2
+ 1431 0458 74       		.byte	0x74
+ 1432 0459 00       		.sleb128 0
+ 1433 045a 12       		.uleb128 0x12
+ 1434 045b 01       		.uleb128 0x1
+ 1435 045c 51       		.byte	0x51
+ 1436 045d 02       		.uleb128 0x2
+ 1437 045e 77       		.byte	0x77
+ 1438 045f 00       		.sleb128 0
+ 1439 0460 12       		.uleb128 0x12
+ 1440 0461 01       		.uleb128 0x1
+ 1441 0462 53       		.byte	0x53
+ 1442 0463 02       		.uleb128 0x2
+ 1443 0464 76       		.byte	0x76
+ 1444 0465 00       		.sleb128 0
+ 1445 0466 12       		.uleb128 0x12
+ 1446 0467 02       		.uleb128 0x2
+ 1447 0468 7D       		.byte	0x7d
+ 1448 0469 00       		.sleb128 0
+ 1449 046a 02       		.uleb128 0x2
+ 1450 046b 78       		.byte	0x78
+ 1451 046c 00       		.sleb128 0
+ 1452 046d 00       		.byte	0
+ 1453 046e 17       		.uleb128 0x17
+ 1454 046f E8000000 		.4byte	.LVL108
+ 1455 0473 7E040000 		.4byte	0x47e
+ 1456 0477 12       		.uleb128 0x12
+ 1457 0478 01       		.uleb128 0x1
+ 1458 0479 50       		.byte	0x50
+ 1459 047a 02       		.uleb128 0x2
+ 1460 047b 74       		.byte	0x74
+ 1461 047c 00       		.sleb128 0
+ 1462 047d 00       		.byte	0
+ 1463 047e 1D       		.uleb128 0x1d
+ 1464 047f FC000000 		.4byte	.LVL113
+ 1465 0483 1E020000 		.4byte	0x21e
+ 1466 0487 9D040000 		.4byte	0x49d
+ 1467 048b 12       		.uleb128 0x12
+ 1468 048c 01       		.uleb128 0x1
+ 1469 048d 50       		.byte	0x50
+ 1470 048e 02       		.uleb128 0x2
+ 1471 048f 74       		.byte	0x74
+ 1472 0490 00       		.sleb128 0
+ 1473 0491 12       		.uleb128 0x12
+ 1474 0492 01       		.uleb128 0x1
+ 1475 0493 51       		.byte	0x51
+ 1476 0494 02       		.uleb128 0x2
+ 1477 0495 77       		.byte	0x77
+ 1478 0496 00       		.sleb128 0
+ 1479 0497 12       		.uleb128 0x12
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 32
+
+
+ 1480 0498 01       		.uleb128 0x1
+ 1481 0499 53       		.byte	0x53
+ 1482 049a 01       		.uleb128 0x1
+ 1483 049b 30       		.byte	0x30
+ 1484 049c 00       		.byte	0
+ 1485 049d 18       		.uleb128 0x18
+ 1486 049e 04010000 		.4byte	.LVL116
+ 1487 04a2 12       		.uleb128 0x12
+ 1488 04a3 01       		.uleb128 0x1
+ 1489 04a4 50       		.byte	0x50
+ 1490 04a5 02       		.uleb128 0x2
+ 1491 04a6 74       		.byte	0x74
+ 1492 04a7 00       		.sleb128 0
+ 1493 04a8 00       		.byte	0
+ 1494 04a9 00       		.byte	0
+ 1495 04aa 18       		.uleb128 0x18
+ 1496 04ab 1A000000 		.4byte	.LVL80
+ 1497 04af 12       		.uleb128 0x12
+ 1498 04b0 01       		.uleb128 0x1
+ 1499 04b1 50       		.byte	0x50
+ 1500 04b2 02       		.uleb128 0x2
+ 1501 04b3 74       		.byte	0x74
+ 1502 04b4 00       		.sleb128 0
+ 1503 04b5 00       		.byte	0
+ 1504 04b6 00       		.byte	0
+ 1505 04b7 1E       		.uleb128 0x1e
+ 1506 04b8 75000000 		.4byte	0x75
+ 1507 04bc C7040000 		.4byte	0x4c7
+ 1508 04c0 1F       		.uleb128 0x1f
+ 1509 04c1 C7040000 		.4byte	0x4c7
+ 1510 04c5 0B       		.byte	0xb
+ 1511 04c6 00       		.byte	0
+ 1512 04c7 09       		.uleb128 0x9
+ 1513 04c8 04       		.byte	0x4
+ 1514 04c9 07       		.byte	0x7
+ 1515 04ca 51010000 		.4byte	.LASF13
+ 1516 04ce 1A       		.uleb128 0x1a
+ 1517 04cf 1A000000 		.4byte	.LASF15
+ 1518 04d3 01       		.byte	0x1
+ 1519 04d4 D7       		.byte	0xd7
+ 1520 04d5 00000000 		.4byte	.LFB6
+ 1521 04d9 0C000000 		.4byte	.LFE6-.LFB6
+ 1522 04dd 01       		.uleb128 0x1
+ 1523 04de 9C       		.byte	0x9c
+ 1524 04df FE040000 		.4byte	0x4fe
+ 1525 04e3 20       		.uleb128 0x20
+ 1526 04e4 75010000 		.4byte	.LASF10
+ 1527 04e8 01       		.byte	0x1
+ 1528 04e9 D7       		.byte	0xd7
+ 1529 04ea 47000000 		.4byte	0x47
+ 1530 04ee 01       		.uleb128 0x1
+ 1531 04ef 50       		.byte	0x50
+ 1532 04f0 20       		.uleb128 0x20
+ 1533 04f1 00000000 		.4byte	.LASF11
+ 1534 04f5 01       		.byte	0x1
+ 1535 04f6 D7       		.byte	0xd7
+ 1536 04f7 5F000000 		.4byte	0x5f
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 33
+
+
+ 1537 04fb 01       		.uleb128 0x1
+ 1538 04fc 51       		.byte	0x51
+ 1539 04fd 00       		.byte	0
+ 1540 04fe 1A       		.uleb128 0x1a
+ 1541 04ff 46010000 		.4byte	.LASF16
+ 1542 0503 01       		.byte	0x1
+ 1543 0504 DD       		.byte	0xdd
+ 1544 0505 00000000 		.4byte	.LFB7
+ 1545 0509 24000000 		.4byte	.LFE7-.LFB7
+ 1546 050d 01       		.uleb128 0x1
+ 1547 050e 9C       		.byte	0x9c
+ 1548 050f 47050000 		.4byte	0x547
+ 1549 0513 19       		.uleb128 0x19
+ 1550 0514 666D7400 		.ascii	"fmt\000"
+ 1551 0518 01       		.byte	0x1
+ 1552 0519 DD       		.byte	0xdd
+ 1553 051a 0D010000 		.4byte	0x10d
+ 1554 051e 02       		.uleb128 0x2
+ 1555 051f 91       		.byte	0x91
+ 1556 0520 70       		.sleb128 -16
+ 1557 0521 21       		.uleb128 0x21
+ 1558 0522 16       		.uleb128 0x16
+ 1559 0523 766100   		.ascii	"va\000"
+ 1560 0526 01       		.byte	0x1
+ 1561 0527 DF       		.byte	0xdf
+ 1562 0528 49000000 		.4byte	0x49
+ 1563 052c 02       		.uleb128 0x2
+ 1564 052d 91       		.byte	0x91
+ 1565 052e 64       		.sleb128 -28
+ 1566 052f 11       		.uleb128 0x11
+ 1567 0530 16000000 		.4byte	.LVL124
+ 1568 0534 F2020000 		.4byte	0x2f2
+ 1569 0538 12       		.uleb128 0x12
+ 1570 0539 01       		.uleb128 0x1
+ 1571 053a 52       		.byte	0x52
+ 1572 053b 03       		.uleb128 0x3
+ 1573 053c 91       		.byte	0x91
+ 1574 053d 50       		.sleb128 -48
+ 1575 053e 06       		.byte	0x6
+ 1576 053f 12       		.uleb128 0x12
+ 1577 0540 01       		.uleb128 0x1
+ 1578 0541 53       		.byte	0x53
+ 1579 0542 02       		.uleb128 0x2
+ 1580 0543 91       		.byte	0x91
+ 1581 0544 54       		.sleb128 -44
+ 1582 0545 00       		.byte	0
+ 1583 0546 00       		.byte	0
+ 1584 0547 1A       		.uleb128 0x1a
+ 1585 0548 50000000 		.4byte	.LASF17
+ 1586 054c 01       		.byte	0x1
+ 1587 054d EC       		.byte	0xec
+ 1588 054e 00000000 		.4byte	.LFB9
+ 1589 0552 2C000000 		.4byte	.LFE9-.LFB9
+ 1590 0556 01       		.uleb128 0x1
+ 1591 0557 9C       		.byte	0x9c
+ 1592 0558 C5050000 		.4byte	0x5c5
+ 1593 055c 0B       		.uleb128 0xb
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 34
+
+
+ 1594 055d 7300     		.ascii	"s\000"
+ 1595 055f 01       		.byte	0x1
+ 1596 0560 EC       		.byte	0xec
+ 1597 0561 0D010000 		.4byte	0x10d
+ 1598 0565 40060000 		.4byte	.LLST30
+ 1599 0569 19       		.uleb128 0x19
+ 1600 056a 666D7400 		.ascii	"fmt\000"
+ 1601 056e 01       		.byte	0x1
+ 1602 056f EC       		.byte	0xec
+ 1603 0570 0D010000 		.4byte	0x10d
+ 1604 0574 02       		.uleb128 0x2
+ 1605 0575 91       		.byte	0x91
+ 1606 0576 74       		.sleb128 -12
+ 1607 0577 21       		.uleb128 0x21
+ 1608 0578 16       		.uleb128 0x16
+ 1609 0579 766100   		.ascii	"va\000"
+ 1610 057c 01       		.byte	0x1
+ 1611 057d EE       		.byte	0xee
+ 1612 057e 49000000 		.4byte	0x49
+ 1613 0582 02       		.uleb128 0x2
+ 1614 0583 91       		.byte	0x91
+ 1615 0584 6C       		.sleb128 -20
+ 1616 0585 1D       		.uleb128 0x1d
+ 1617 0586 16000000 		.4byte	.LVL127
+ 1618 058a F2020000 		.4byte	0x2f2
+ 1619 058e AF050000 		.4byte	0x5af
+ 1620 0592 12       		.uleb128 0x12
+ 1621 0593 01       		.uleb128 0x1
+ 1622 0594 50       		.byte	0x50
+ 1623 0595 02       		.uleb128 0x2
+ 1624 0596 91       		.byte	0x91
+ 1625 0597 4C       		.sleb128 -52
+ 1626 0598 12       		.uleb128 0x12
+ 1627 0599 01       		.uleb128 0x1
+ 1628 059a 51       		.byte	0x51
+ 1629 059b 05       		.uleb128 0x5
+ 1630 059c 03       		.byte	0x3
+ 1631 059d 00000000 		.4byte	putcp
+ 1632 05a1 12       		.uleb128 0x12
+ 1633 05a2 01       		.uleb128 0x1
+ 1634 05a3 52       		.byte	0x52
+ 1635 05a4 03       		.uleb128 0x3
+ 1636 05a5 91       		.byte	0x91
+ 1637 05a6 5C       		.sleb128 -36
+ 1638 05a7 06       		.byte	0x6
+ 1639 05a8 12       		.uleb128 0x12
+ 1640 05a9 01       		.uleb128 0x1
+ 1641 05aa 53       		.byte	0x53
+ 1642 05ab 02       		.uleb128 0x2
+ 1643 05ac 91       		.byte	0x91
+ 1644 05ad 60       		.sleb128 -32
+ 1645 05ae 00       		.byte	0
+ 1646 05af 11       		.uleb128 0x11
+ 1647 05b0 1E000000 		.4byte	.LVL129
+ 1648 05b4 C6020000 		.4byte	0x2c6
+ 1649 05b8 12       		.uleb128 0x12
+ 1650 05b9 01       		.uleb128 0x1
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 35
+
+
+ 1651 05ba 50       		.byte	0x50
+ 1652 05bb 02       		.uleb128 0x2
+ 1653 05bc 91       		.byte	0x91
+ 1654 05bd 4C       		.sleb128 -52
+ 1655 05be 12       		.uleb128 0x12
+ 1656 05bf 01       		.uleb128 0x1
+ 1657 05c0 51       		.byte	0x51
+ 1658 05c1 01       		.uleb128 0x1
+ 1659 05c2 30       		.byte	0x30
+ 1660 05c3 00       		.byte	0
+ 1661 05c4 00       		.byte	0
+ 1662 05c5 22       		.uleb128 0x22
+ 1663 05c6 98010000 		.4byte	.LASF18
+ 1664 05ca 01       		.byte	0x1
+ 1665 05cb 23       		.byte	0x23
+ 1666 05cc 54000000 		.4byte	0x54
+ 1667 05d0 05       		.uleb128 0x5
+ 1668 05d1 03       		.byte	0x3
+ 1669 05d2 00000000 		.4byte	stdout_putf
+ 1670 05d6 22       		.uleb128 0x22
+ 1671 05d7 44000000 		.4byte	.LASF19
+ 1672 05db 01       		.byte	0x1
+ 1673 05dc 24       		.byte	0x24
+ 1674 05dd 47000000 		.4byte	0x47
+ 1675 05e1 05       		.uleb128 0x5
+ 1676 05e2 03       		.byte	0x3
+ 1677 05e3 04000000 		.4byte	stdout_putp
+ 1678 05e7 00       		.byte	0
+ 1679              		.section	.debug_abbrev,"",%progbits
+ 1680              	.Ldebug_abbrev0:
+ 1681 0000 01       		.uleb128 0x1
+ 1682 0001 11       		.uleb128 0x11
+ 1683 0002 01       		.byte	0x1
+ 1684 0003 25       		.uleb128 0x25
+ 1685 0004 0E       		.uleb128 0xe
+ 1686 0005 13       		.uleb128 0x13
+ 1687 0006 0B       		.uleb128 0xb
+ 1688 0007 03       		.uleb128 0x3
+ 1689 0008 0E       		.uleb128 0xe
+ 1690 0009 1B       		.uleb128 0x1b
+ 1691 000a 0E       		.uleb128 0xe
+ 1692 000b 55       		.uleb128 0x55
+ 1693 000c 17       		.uleb128 0x17
+ 1694 000d 11       		.uleb128 0x11
+ 1695 000e 01       		.uleb128 0x1
+ 1696 000f 10       		.uleb128 0x10
+ 1697 0010 17       		.uleb128 0x17
+ 1698 0011 00       		.byte	0
+ 1699 0012 00       		.byte	0
+ 1700 0013 02       		.uleb128 0x2
+ 1701 0014 16       		.uleb128 0x16
+ 1702 0015 00       		.byte	0
+ 1703 0016 03       		.uleb128 0x3
+ 1704 0017 0E       		.uleb128 0xe
+ 1705 0018 3A       		.uleb128 0x3a
+ 1706 0019 0B       		.uleb128 0xb
+ 1707 001a 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 36
+
+
+ 1708 001b 0B       		.uleb128 0xb
+ 1709 001c 49       		.uleb128 0x49
+ 1710 001d 13       		.uleb128 0x13
+ 1711 001e 00       		.byte	0
+ 1712 001f 00       		.byte	0
+ 1713 0020 03       		.uleb128 0x3
+ 1714 0021 13       		.uleb128 0x13
+ 1715 0022 01       		.byte	0x1
+ 1716 0023 03       		.uleb128 0x3
+ 1717 0024 0E       		.uleb128 0xe
+ 1718 0025 0B       		.uleb128 0xb
+ 1719 0026 0B       		.uleb128 0xb
+ 1720 0027 3A       		.uleb128 0x3a
+ 1721 0028 0B       		.uleb128 0xb
+ 1722 0029 3B       		.uleb128 0x3b
+ 1723 002a 0B       		.uleb128 0xb
+ 1724 002b 01       		.uleb128 0x1
+ 1725 002c 13       		.uleb128 0x13
+ 1726 002d 00       		.byte	0
+ 1727 002e 00       		.byte	0
+ 1728 002f 04       		.uleb128 0x4
+ 1729 0030 0D       		.uleb128 0xd
+ 1730 0031 00       		.byte	0
+ 1731 0032 03       		.uleb128 0x3
+ 1732 0033 0E       		.uleb128 0xe
+ 1733 0034 49       		.uleb128 0x49
+ 1734 0035 13       		.uleb128 0x13
+ 1735 0036 38       		.uleb128 0x38
+ 1736 0037 0B       		.uleb128 0xb
+ 1737 0038 34       		.uleb128 0x34
+ 1738 0039 19       		.uleb128 0x19
+ 1739 003a 00       		.byte	0
+ 1740 003b 00       		.byte	0
+ 1741 003c 05       		.uleb128 0x5
+ 1742 003d 0F       		.uleb128 0xf
+ 1743 003e 00       		.byte	0
+ 1744 003f 0B       		.uleb128 0xb
+ 1745 0040 0B       		.uleb128 0xb
+ 1746 0041 00       		.byte	0
+ 1747 0042 00       		.byte	0
+ 1748 0043 06       		.uleb128 0x6
+ 1749 0044 0F       		.uleb128 0xf
+ 1750 0045 00       		.byte	0
+ 1751 0046 0B       		.uleb128 0xb
+ 1752 0047 0B       		.uleb128 0xb
+ 1753 0048 49       		.uleb128 0x49
+ 1754 0049 13       		.uleb128 0x13
+ 1755 004a 00       		.byte	0
+ 1756 004b 00       		.byte	0
+ 1757 004c 07       		.uleb128 0x7
+ 1758 004d 15       		.uleb128 0x15
+ 1759 004e 01       		.byte	0x1
+ 1760 004f 27       		.uleb128 0x27
+ 1761 0050 19       		.uleb128 0x19
+ 1762 0051 01       		.uleb128 0x1
+ 1763 0052 13       		.uleb128 0x13
+ 1764 0053 00       		.byte	0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 37
+
+
+ 1765 0054 00       		.byte	0
+ 1766 0055 08       		.uleb128 0x8
+ 1767 0056 05       		.uleb128 0x5
+ 1768 0057 00       		.byte	0
+ 1769 0058 49       		.uleb128 0x49
+ 1770 0059 13       		.uleb128 0x13
+ 1771 005a 00       		.byte	0
+ 1772 005b 00       		.byte	0
+ 1773 005c 09       		.uleb128 0x9
+ 1774 005d 24       		.uleb128 0x24
+ 1775 005e 00       		.byte	0
+ 1776 005f 0B       		.uleb128 0xb
+ 1777 0060 0B       		.uleb128 0xb
+ 1778 0061 3E       		.uleb128 0x3e
+ 1779 0062 0B       		.uleb128 0xb
+ 1780 0063 03       		.uleb128 0x3
+ 1781 0064 0E       		.uleb128 0xe
+ 1782 0065 00       		.byte	0
+ 1783 0066 00       		.byte	0
+ 1784 0067 0A       		.uleb128 0xa
+ 1785 0068 2E       		.uleb128 0x2e
+ 1786 0069 01       		.byte	0x1
+ 1787 006a 03       		.uleb128 0x3
+ 1788 006b 0E       		.uleb128 0xe
+ 1789 006c 3A       		.uleb128 0x3a
+ 1790 006d 0B       		.uleb128 0xb
+ 1791 006e 3B       		.uleb128 0x3b
+ 1792 006f 0B       		.uleb128 0xb
+ 1793 0070 27       		.uleb128 0x27
+ 1794 0071 19       		.uleb128 0x19
+ 1795 0072 11       		.uleb128 0x11
+ 1796 0073 01       		.uleb128 0x1
+ 1797 0074 12       		.uleb128 0x12
+ 1798 0075 06       		.uleb128 0x6
+ 1799 0076 40       		.uleb128 0x40
+ 1800 0077 18       		.uleb128 0x18
+ 1801 0078 9642     		.uleb128 0x2116
+ 1802 007a 19       		.uleb128 0x19
+ 1803 007b 01       		.uleb128 0x1
+ 1804 007c 13       		.uleb128 0x13
+ 1805 007d 00       		.byte	0
+ 1806 007e 00       		.byte	0
+ 1807 007f 0B       		.uleb128 0xb
+ 1808 0080 05       		.uleb128 0x5
+ 1809 0081 00       		.byte	0
+ 1810 0082 03       		.uleb128 0x3
+ 1811 0083 08       		.uleb128 0x8
+ 1812 0084 3A       		.uleb128 0x3a
+ 1813 0085 0B       		.uleb128 0xb
+ 1814 0086 3B       		.uleb128 0x3b
+ 1815 0087 0B       		.uleb128 0xb
+ 1816 0088 49       		.uleb128 0x49
+ 1817 0089 13       		.uleb128 0x13
+ 1818 008a 02       		.uleb128 0x2
+ 1819 008b 17       		.uleb128 0x17
+ 1820 008c 00       		.byte	0
+ 1821 008d 00       		.byte	0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 38
+
+
+ 1822 008e 0C       		.uleb128 0xc
+ 1823 008f 05       		.uleb128 0x5
+ 1824 0090 00       		.byte	0
+ 1825 0091 03       		.uleb128 0x3
+ 1826 0092 0E       		.uleb128 0xe
+ 1827 0093 3A       		.uleb128 0x3a
+ 1828 0094 0B       		.uleb128 0xb
+ 1829 0095 3B       		.uleb128 0x3b
+ 1830 0096 0B       		.uleb128 0xb
+ 1831 0097 49       		.uleb128 0x49
+ 1832 0098 13       		.uleb128 0x13
+ 1833 0099 02       		.uleb128 0x2
+ 1834 009a 17       		.uleb128 0x17
+ 1835 009b 00       		.byte	0
+ 1836 009c 00       		.byte	0
+ 1837 009d 0D       		.uleb128 0xd
+ 1838 009e 34       		.uleb128 0x34
+ 1839 009f 00       		.byte	0
+ 1840 00a0 03       		.uleb128 0x3
+ 1841 00a1 08       		.uleb128 0x8
+ 1842 00a2 3A       		.uleb128 0x3a
+ 1843 00a3 0B       		.uleb128 0xb
+ 1844 00a4 3B       		.uleb128 0x3b
+ 1845 00a5 0B       		.uleb128 0xb
+ 1846 00a6 49       		.uleb128 0x49
+ 1847 00a7 13       		.uleb128 0x13
+ 1848 00a8 02       		.uleb128 0x2
+ 1849 00a9 17       		.uleb128 0x17
+ 1850 00aa 00       		.byte	0
+ 1851 00ab 00       		.byte	0
+ 1852 00ac 0E       		.uleb128 0xe
+ 1853 00ad 0B       		.uleb128 0xb
+ 1854 00ae 01       		.byte	0x1
+ 1855 00af 11       		.uleb128 0x11
+ 1856 00b0 01       		.uleb128 0x1
+ 1857 00b1 12       		.uleb128 0x12
+ 1858 00b2 06       		.uleb128 0x6
+ 1859 00b3 00       		.byte	0
+ 1860 00b4 00       		.byte	0
+ 1861 00b5 0F       		.uleb128 0xf
+ 1862 00b6 24       		.uleb128 0x24
+ 1863 00b7 00       		.byte	0
+ 1864 00b8 0B       		.uleb128 0xb
+ 1865 00b9 0B       		.uleb128 0xb
+ 1866 00ba 3E       		.uleb128 0x3e
+ 1867 00bb 0B       		.uleb128 0xb
+ 1868 00bc 03       		.uleb128 0x3
+ 1869 00bd 08       		.uleb128 0x8
+ 1870 00be 00       		.byte	0
+ 1871 00bf 00       		.byte	0
+ 1872 00c0 10       		.uleb128 0x10
+ 1873 00c1 2E       		.uleb128 0x2e
+ 1874 00c2 01       		.byte	0x1
+ 1875 00c3 03       		.uleb128 0x3
+ 1876 00c4 08       		.uleb128 0x8
+ 1877 00c5 3A       		.uleb128 0x3a
+ 1878 00c6 0B       		.uleb128 0xb
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 39
+
+
+ 1879 00c7 3B       		.uleb128 0x3b
+ 1880 00c8 0B       		.uleb128 0xb
+ 1881 00c9 27       		.uleb128 0x27
+ 1882 00ca 19       		.uleb128 0x19
+ 1883 00cb 11       		.uleb128 0x11
+ 1884 00cc 01       		.uleb128 0x1
+ 1885 00cd 12       		.uleb128 0x12
+ 1886 00ce 06       		.uleb128 0x6
+ 1887 00cf 40       		.uleb128 0x40
+ 1888 00d0 18       		.uleb128 0x18
+ 1889 00d1 9742     		.uleb128 0x2117
+ 1890 00d3 19       		.uleb128 0x19
+ 1891 00d4 01       		.uleb128 0x1
+ 1892 00d5 13       		.uleb128 0x13
+ 1893 00d6 00       		.byte	0
+ 1894 00d7 00       		.byte	0
+ 1895 00d8 11       		.uleb128 0x11
+ 1896 00d9 898201   		.uleb128 0x4109
+ 1897 00dc 01       		.byte	0x1
+ 1898 00dd 11       		.uleb128 0x11
+ 1899 00de 01       		.uleb128 0x1
+ 1900 00df 31       		.uleb128 0x31
+ 1901 00e0 13       		.uleb128 0x13
+ 1902 00e1 00       		.byte	0
+ 1903 00e2 00       		.byte	0
+ 1904 00e3 12       		.uleb128 0x12
+ 1905 00e4 8A8201   		.uleb128 0x410a
+ 1906 00e7 00       		.byte	0
+ 1907 00e8 02       		.uleb128 0x2
+ 1908 00e9 18       		.uleb128 0x18
+ 1909 00ea 9142     		.uleb128 0x2111
+ 1910 00ec 18       		.uleb128 0x18
+ 1911 00ed 00       		.byte	0
+ 1912 00ee 00       		.byte	0
+ 1913 00ef 13       		.uleb128 0x13
+ 1914 00f0 2E       		.uleb128 0x2e
+ 1915 00f1 01       		.byte	0x1
+ 1916 00f2 03       		.uleb128 0x3
+ 1917 00f3 08       		.uleb128 0x8
+ 1918 00f4 3A       		.uleb128 0x3a
+ 1919 00f5 0B       		.uleb128 0xb
+ 1920 00f6 3B       		.uleb128 0x3b
+ 1921 00f7 0B       		.uleb128 0xb
+ 1922 00f8 27       		.uleb128 0x27
+ 1923 00f9 19       		.uleb128 0x19
+ 1924 00fa 49       		.uleb128 0x49
+ 1925 00fb 13       		.uleb128 0x13
+ 1926 00fc 11       		.uleb128 0x11
+ 1927 00fd 01       		.uleb128 0x1
+ 1928 00fe 12       		.uleb128 0x12
+ 1929 00ff 06       		.uleb128 0x6
+ 1930 0100 40       		.uleb128 0x40
+ 1931 0101 18       		.uleb128 0x18
+ 1932 0102 9742     		.uleb128 0x2117
+ 1933 0104 19       		.uleb128 0x19
+ 1934 0105 01       		.uleb128 0x1
+ 1935 0106 13       		.uleb128 0x13
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 40
+
+
+ 1936 0107 00       		.byte	0
+ 1937 0108 00       		.byte	0
+ 1938 0109 14       		.uleb128 0x14
+ 1939 010a 34       		.uleb128 0x34
+ 1940 010b 00       		.byte	0
+ 1941 010c 03       		.uleb128 0x3
+ 1942 010d 0E       		.uleb128 0xe
+ 1943 010e 3A       		.uleb128 0x3a
+ 1944 010f 0B       		.uleb128 0xb
+ 1945 0110 3B       		.uleb128 0x3b
+ 1946 0111 0B       		.uleb128 0xb
+ 1947 0112 49       		.uleb128 0x49
+ 1948 0113 13       		.uleb128 0x13
+ 1949 0114 02       		.uleb128 0x2
+ 1950 0115 17       		.uleb128 0x17
+ 1951 0116 00       		.byte	0
+ 1952 0117 00       		.byte	0
+ 1953 0118 15       		.uleb128 0x15
+ 1954 0119 2E       		.uleb128 0x2e
+ 1955 011a 01       		.byte	0x1
+ 1956 011b 03       		.uleb128 0x3
+ 1957 011c 0E       		.uleb128 0xe
+ 1958 011d 3A       		.uleb128 0x3a
+ 1959 011e 0B       		.uleb128 0xb
+ 1960 011f 3B       		.uleb128 0x3b
+ 1961 0120 0B       		.uleb128 0xb
+ 1962 0121 27       		.uleb128 0x27
+ 1963 0122 19       		.uleb128 0x19
+ 1964 0123 11       		.uleb128 0x11
+ 1965 0124 01       		.uleb128 0x1
+ 1966 0125 12       		.uleb128 0x12
+ 1967 0126 06       		.uleb128 0x6
+ 1968 0127 40       		.uleb128 0x40
+ 1969 0128 18       		.uleb128 0x18
+ 1970 0129 9742     		.uleb128 0x2117
+ 1971 012b 19       		.uleb128 0x19
+ 1972 012c 01       		.uleb128 0x1
+ 1973 012d 13       		.uleb128 0x13
+ 1974 012e 00       		.byte	0
+ 1975 012f 00       		.byte	0
+ 1976 0130 16       		.uleb128 0x16
+ 1977 0131 34       		.uleb128 0x34
+ 1978 0132 00       		.byte	0
+ 1979 0133 03       		.uleb128 0x3
+ 1980 0134 08       		.uleb128 0x8
+ 1981 0135 3A       		.uleb128 0x3a
+ 1982 0136 0B       		.uleb128 0xb
+ 1983 0137 3B       		.uleb128 0x3b
+ 1984 0138 0B       		.uleb128 0xb
+ 1985 0139 49       		.uleb128 0x49
+ 1986 013a 13       		.uleb128 0x13
+ 1987 013b 02       		.uleb128 0x2
+ 1988 013c 18       		.uleb128 0x18
+ 1989 013d 00       		.byte	0
+ 1990 013e 00       		.byte	0
+ 1991 013f 17       		.uleb128 0x17
+ 1992 0140 898201   		.uleb128 0x4109
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 41
+
+
+ 1993 0143 01       		.byte	0x1
+ 1994 0144 11       		.uleb128 0x11
+ 1995 0145 01       		.uleb128 0x1
+ 1996 0146 01       		.uleb128 0x1
+ 1997 0147 13       		.uleb128 0x13
+ 1998 0148 00       		.byte	0
+ 1999 0149 00       		.byte	0
+ 2000 014a 18       		.uleb128 0x18
+ 2001 014b 898201   		.uleb128 0x4109
+ 2002 014e 01       		.byte	0x1
+ 2003 014f 11       		.uleb128 0x11
+ 2004 0150 01       		.uleb128 0x1
+ 2005 0151 00       		.byte	0
+ 2006 0152 00       		.byte	0
+ 2007 0153 19       		.uleb128 0x19
+ 2008 0154 05       		.uleb128 0x5
+ 2009 0155 00       		.byte	0
+ 2010 0156 03       		.uleb128 0x3
+ 2011 0157 08       		.uleb128 0x8
+ 2012 0158 3A       		.uleb128 0x3a
+ 2013 0159 0B       		.uleb128 0xb
+ 2014 015a 3B       		.uleb128 0x3b
+ 2015 015b 0B       		.uleb128 0xb
+ 2016 015c 49       		.uleb128 0x49
+ 2017 015d 13       		.uleb128 0x13
+ 2018 015e 02       		.uleb128 0x2
+ 2019 015f 18       		.uleb128 0x18
+ 2020 0160 00       		.byte	0
+ 2021 0161 00       		.byte	0
+ 2022 0162 1A       		.uleb128 0x1a
+ 2023 0163 2E       		.uleb128 0x2e
+ 2024 0164 01       		.byte	0x1
+ 2025 0165 3F       		.uleb128 0x3f
+ 2026 0166 19       		.uleb128 0x19
+ 2027 0167 03       		.uleb128 0x3
+ 2028 0168 0E       		.uleb128 0xe
+ 2029 0169 3A       		.uleb128 0x3a
+ 2030 016a 0B       		.uleb128 0xb
+ 2031 016b 3B       		.uleb128 0x3b
+ 2032 016c 0B       		.uleb128 0xb
+ 2033 016d 27       		.uleb128 0x27
+ 2034 016e 19       		.uleb128 0x19
+ 2035 016f 11       		.uleb128 0x11
+ 2036 0170 01       		.uleb128 0x1
+ 2037 0171 12       		.uleb128 0x12
+ 2038 0172 06       		.uleb128 0x6
+ 2039 0173 40       		.uleb128 0x40
+ 2040 0174 18       		.uleb128 0x18
+ 2041 0175 9742     		.uleb128 0x2117
+ 2042 0177 19       		.uleb128 0x19
+ 2043 0178 01       		.uleb128 0x1
+ 2044 0179 13       		.uleb128 0x13
+ 2045 017a 00       		.byte	0
+ 2046 017b 00       		.byte	0
+ 2047 017c 1B       		.uleb128 0x1b
+ 2048 017d 0A       		.uleb128 0xa
+ 2049 017e 00       		.byte	0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 42
+
+
+ 2050 017f 03       		.uleb128 0x3
+ 2051 0180 0E       		.uleb128 0xe
+ 2052 0181 3A       		.uleb128 0x3a
+ 2053 0182 0B       		.uleb128 0xb
+ 2054 0183 3B       		.uleb128 0x3b
+ 2055 0184 0B       		.uleb128 0xb
+ 2056 0185 11       		.uleb128 0x11
+ 2057 0186 01       		.uleb128 0x1
+ 2058 0187 00       		.byte	0
+ 2059 0188 00       		.byte	0
+ 2060 0189 1C       		.uleb128 0x1c
+ 2061 018a 0B       		.uleb128 0xb
+ 2062 018b 01       		.byte	0x1
+ 2063 018c 11       		.uleb128 0x11
+ 2064 018d 01       		.uleb128 0x1
+ 2065 018e 12       		.uleb128 0x12
+ 2066 018f 06       		.uleb128 0x6
+ 2067 0190 01       		.uleb128 0x1
+ 2068 0191 13       		.uleb128 0x13
+ 2069 0192 00       		.byte	0
+ 2070 0193 00       		.byte	0
+ 2071 0194 1D       		.uleb128 0x1d
+ 2072 0195 898201   		.uleb128 0x4109
+ 2073 0198 01       		.byte	0x1
+ 2074 0199 11       		.uleb128 0x11
+ 2075 019a 01       		.uleb128 0x1
+ 2076 019b 31       		.uleb128 0x31
+ 2077 019c 13       		.uleb128 0x13
+ 2078 019d 01       		.uleb128 0x1
+ 2079 019e 13       		.uleb128 0x13
+ 2080 019f 00       		.byte	0
+ 2081 01a0 00       		.byte	0
+ 2082 01a1 1E       		.uleb128 0x1e
+ 2083 01a2 01       		.uleb128 0x1
+ 2084 01a3 01       		.byte	0x1
+ 2085 01a4 49       		.uleb128 0x49
+ 2086 01a5 13       		.uleb128 0x13
+ 2087 01a6 01       		.uleb128 0x1
+ 2088 01a7 13       		.uleb128 0x13
+ 2089 01a8 00       		.byte	0
+ 2090 01a9 00       		.byte	0
+ 2091 01aa 1F       		.uleb128 0x1f
+ 2092 01ab 21       		.uleb128 0x21
+ 2093 01ac 00       		.byte	0
+ 2094 01ad 49       		.uleb128 0x49
+ 2095 01ae 13       		.uleb128 0x13
+ 2096 01af 2F       		.uleb128 0x2f
+ 2097 01b0 0B       		.uleb128 0xb
+ 2098 01b1 00       		.byte	0
+ 2099 01b2 00       		.byte	0
+ 2100 01b3 20       		.uleb128 0x20
+ 2101 01b4 05       		.uleb128 0x5
+ 2102 01b5 00       		.byte	0
+ 2103 01b6 03       		.uleb128 0x3
+ 2104 01b7 0E       		.uleb128 0xe
+ 2105 01b8 3A       		.uleb128 0x3a
+ 2106 01b9 0B       		.uleb128 0xb
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 43
+
+
+ 2107 01ba 3B       		.uleb128 0x3b
+ 2108 01bb 0B       		.uleb128 0xb
+ 2109 01bc 49       		.uleb128 0x49
+ 2110 01bd 13       		.uleb128 0x13
+ 2111 01be 02       		.uleb128 0x2
+ 2112 01bf 18       		.uleb128 0x18
+ 2113 01c0 00       		.byte	0
+ 2114 01c1 00       		.byte	0
+ 2115 01c2 21       		.uleb128 0x21
+ 2116 01c3 18       		.uleb128 0x18
+ 2117 01c4 00       		.byte	0
+ 2118 01c5 00       		.byte	0
+ 2119 01c6 00       		.byte	0
+ 2120 01c7 22       		.uleb128 0x22
+ 2121 01c8 34       		.uleb128 0x34
+ 2122 01c9 00       		.byte	0
+ 2123 01ca 03       		.uleb128 0x3
+ 2124 01cb 0E       		.uleb128 0xe
+ 2125 01cc 3A       		.uleb128 0x3a
+ 2126 01cd 0B       		.uleb128 0xb
+ 2127 01ce 3B       		.uleb128 0x3b
+ 2128 01cf 0B       		.uleb128 0xb
+ 2129 01d0 49       		.uleb128 0x49
+ 2130 01d1 13       		.uleb128 0x13
+ 2131 01d2 02       		.uleb128 0x2
+ 2132 01d3 18       		.uleb128 0x18
+ 2133 01d4 00       		.byte	0
+ 2134 01d5 00       		.byte	0
+ 2135 01d6 00       		.byte	0
+ 2136              		.section	.debug_loc,"",%progbits
+ 2137              	.Ldebug_loc0:
+ 2138              	.LLST0:
+ 2139 0000 00000000 		.4byte	.LVL0
+ 2140 0004 16000000 		.4byte	.LVL2
+ 2141 0008 0100     		.2byte	0x1
+ 2142 000a 50       		.byte	0x50
+ 2143 000b 16000000 		.4byte	.LVL2
+ 2144 000f 40000000 		.4byte	.LVL10
+ 2145 0013 0200     		.2byte	0x2
+ 2146 0015 7D       		.byte	0x7d
+ 2147 0016 00       		.sleb128 0
+ 2148 0017 40000000 		.4byte	.LVL10
+ 2149 001b 42000000 		.4byte	.LVL11
+ 2150 001f 0100     		.2byte	0x1
+ 2151 0021 51       		.byte	0x51
+ 2152 0022 42000000 		.4byte	.LVL11
+ 2153 0026 86000000 		.4byte	.LVL23
+ 2154 002a 0200     		.2byte	0x2
+ 2155 002c 7D       		.byte	0x7d
+ 2156 002d 00       		.sleb128 0
+ 2157 002e 86000000 		.4byte	.LVL23
+ 2158 0032 8E000000 		.4byte	.LFE0
+ 2159 0036 0200     		.2byte	0x2
+ 2160 0038 91       		.byte	0x91
+ 2161 0039 58       		.sleb128 -40
+ 2162 003a 00000000 		.4byte	0
+ 2163 003e 00000000 		.4byte	0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 44
+
+
+ 2164              	.LLST1:
+ 2165 0042 00000000 		.4byte	.LVL0
+ 2166 0046 16000000 		.4byte	.LVL2
+ 2167 004a 0100     		.2byte	0x1
+ 2168 004c 51       		.byte	0x51
+ 2169 004d 16000000 		.4byte	.LVL2
+ 2170 0051 86000000 		.4byte	.LVL26
+ 2171 0055 0100     		.2byte	0x1
+ 2172 0057 57       		.byte	0x57
+ 2173 0058 86000000 		.4byte	.LVL26
+ 2174 005c 8E000000 		.4byte	.LFE0
+ 2175 0060 0400     		.2byte	0x4
+ 2176 0062 F3       		.byte	0xf3
+ 2177 0063 01       		.uleb128 0x1
+ 2178 0064 51       		.byte	0x51
+ 2179 0065 9F       		.byte	0x9f
+ 2180 0066 00000000 		.4byte	0
+ 2181 006a 00000000 		.4byte	0
+ 2182              	.LLST2:
+ 2183 006e 00000000 		.4byte	.LVL0
+ 2184 0072 16000000 		.4byte	.LVL2
+ 2185 0076 0100     		.2byte	0x1
+ 2186 0078 52       		.byte	0x52
+ 2187 0079 16000000 		.4byte	.LVL2
+ 2188 007d 64000000 		.4byte	.LVL16
+ 2189 0081 0100     		.2byte	0x1
+ 2190 0083 5A       		.byte	0x5a
+ 2191 0084 64000000 		.4byte	.LVL16
+ 2192 0088 66000000 		.4byte	.LVL17
+ 2193 008c 0100     		.2byte	0x1
+ 2194 008e 52       		.byte	0x52
+ 2195 008f 66000000 		.4byte	.LVL17
+ 2196 0093 6C000000 		.4byte	.LVL18
+ 2197 0097 0100     		.2byte	0x1
+ 2198 0099 5A       		.byte	0x5a
+ 2199 009a 6C000000 		.4byte	.LVL18
+ 2200 009e 6E000000 		.4byte	.LVL19
+ 2201 00a2 0100     		.2byte	0x1
+ 2202 00a4 52       		.byte	0x52
+ 2203 00a5 6E000000 		.4byte	.LVL19
+ 2204 00a9 86000000 		.4byte	.LVL28
+ 2205 00ad 0100     		.2byte	0x1
+ 2206 00af 5A       		.byte	0x5a
+ 2207 00b0 86000000 		.4byte	.LVL28
+ 2208 00b4 8E000000 		.4byte	.LFE0
+ 2209 00b8 0400     		.2byte	0x4
+ 2210 00ba F3       		.byte	0xf3
+ 2211 00bb 01       		.uleb128 0x1
+ 2212 00bc 52       		.byte	0x52
+ 2213 00bd 9F       		.byte	0x9f
+ 2214 00be 00000000 		.4byte	0
+ 2215 00c2 00000000 		.4byte	0
+ 2216              	.LLST3:
+ 2217 00c6 00000000 		.4byte	.LVL0
+ 2218 00ca 16000000 		.4byte	.LVL2
+ 2219 00ce 0100     		.2byte	0x1
+ 2220 00d0 53       		.byte	0x53
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 45
+
+
+ 2221 00d1 16000000 		.4byte	.LVL2
+ 2222 00d5 5A000000 		.4byte	.LVL15
+ 2223 00d9 0100     		.2byte	0x1
+ 2224 00db 56       		.byte	0x56
+ 2225 00dc 5A000000 		.4byte	.LVL15
+ 2226 00e0 7C000000 		.4byte	.LVL22
+ 2227 00e4 0100     		.2byte	0x1
+ 2228 00e6 53       		.byte	0x53
+ 2229 00e7 7C000000 		.4byte	.LVL22
+ 2230 00eb 86000000 		.4byte	.LVL25
+ 2231 00ef 0100     		.2byte	0x1
+ 2232 00f1 56       		.byte	0x56
+ 2233 00f2 00000000 		.4byte	0
+ 2234 00f6 00000000 		.4byte	0
+ 2235              	.LLST4:
+ 2236 00fa 12000000 		.4byte	.LVL1
+ 2237 00fe 2A000000 		.4byte	.LVL5
+ 2238 0102 0200     		.2byte	0x2
+ 2239 0104 30       		.byte	0x30
+ 2240 0105 9F       		.byte	0x9f
+ 2241 0106 2A000000 		.4byte	.LVL5
+ 2242 010a 50000000 		.4byte	.LVL14
+ 2243 010e 0100     		.2byte	0x1
+ 2244 0110 59       		.byte	0x59
+ 2245 0111 50000000 		.4byte	.LVL14
+ 2246 0115 5A000000 		.4byte	.LVL15
+ 2247 0119 0100     		.2byte	0x1
+ 2248 011b 53       		.byte	0x53
+ 2249 011c 5A000000 		.4byte	.LVL15
+ 2250 0120 86000000 		.4byte	.LVL27
+ 2251 0124 0100     		.2byte	0x1
+ 2252 0126 59       		.byte	0x59
+ 2253 0127 00000000 		.4byte	0
+ 2254 012b 00000000 		.4byte	0
+ 2255              	.LLST5:
+ 2256 012f 12000000 		.4byte	.LVL1
+ 2257 0133 16000000 		.4byte	.LVL2
+ 2258 0137 0200     		.2byte	0x2
+ 2259 0139 31       		.byte	0x31
+ 2260 013a 9F       		.byte	0x9f
+ 2261 013b 16000000 		.4byte	.LVL2
+ 2262 013f 4A000000 		.4byte	.LVL13
+ 2263 0143 0100     		.2byte	0x1
+ 2264 0145 54       		.byte	0x54
+ 2265 0146 4A000000 		.4byte	.LVL13
+ 2266 014a 7C000000 		.4byte	.LVL22
+ 2267 014e 0100     		.2byte	0x1
+ 2268 0150 50       		.byte	0x50
+ 2269 0151 7C000000 		.4byte	.LVL22
+ 2270 0155 86000000 		.4byte	.LVL24
+ 2271 0159 0100     		.2byte	0x1
+ 2272 015b 54       		.byte	0x54
+ 2273 015c 00000000 		.4byte	0
+ 2274 0160 00000000 		.4byte	0
+ 2275              	.LLST6:
+ 2276 0164 36000000 		.4byte	.LVL7
+ 2277 0168 3A000000 		.4byte	.LVL8
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 46
+
+
+ 2278 016c 0100     		.2byte	0x1
+ 2279 016e 50       		.byte	0x50
+ 2280 016f 3A000000 		.4byte	.LVL8
+ 2281 0173 72000000 		.4byte	.LVL20
+ 2282 0177 0100     		.2byte	0x1
+ 2283 0179 55       		.byte	0x55
+ 2284 017a 72000000 		.4byte	.LVL20
+ 2285 017e 7C000000 		.4byte	.LVL22
+ 2286 0182 0200     		.2byte	0x2
+ 2287 0184 91       		.byte	0x91
+ 2288 0185 5C       		.sleb128 -36
+ 2289 0186 00000000 		.4byte	0
+ 2290 018a 00000000 		.4byte	0
+ 2291              	.LLST7:
+ 2292 018e 00000000 		.4byte	.LVL29
+ 2293 0192 0A000000 		.4byte	.LVL30
+ 2294 0196 0100     		.2byte	0x1
+ 2295 0198 50       		.byte	0x50
+ 2296 0199 0A000000 		.4byte	.LVL30
+ 2297 019d 17000000 		.4byte	.LVL32-1
+ 2298 01a1 0100     		.2byte	0x1
+ 2299 01a3 50       		.byte	0x50
+ 2300 01a4 00000000 		.4byte	0
+ 2301 01a8 00000000 		.4byte	0
+ 2302              	.LLST8:
+ 2303 01ac 00000000 		.4byte	.LVL29
+ 2304 01b0 0A000000 		.4byte	.LVL30
+ 2305 01b4 0100     		.2byte	0x1
+ 2306 01b6 51       		.byte	0x51
+ 2307 01b7 0A000000 		.4byte	.LVL30
+ 2308 01bb 10000000 		.4byte	.LVL31
+ 2309 01bf 0300     		.2byte	0x3
+ 2310 01c1 71       		.byte	0x71
+ 2311 01c2 01       		.sleb128 1
+ 2312 01c3 9F       		.byte	0x9f
+ 2313 01c4 10000000 		.4byte	.LVL31
+ 2314 01c8 17000000 		.4byte	.LVL32-1
+ 2315 01cc 0100     		.2byte	0x1
+ 2316 01ce 53       		.byte	0x53
+ 2317 01cf 00000000 		.4byte	0
+ 2318 01d3 00000000 		.4byte	0
+ 2319              	.LLST9:
+ 2320 01d7 00000000 		.4byte	.LVL33
+ 2321 01db 0C000000 		.4byte	.LVL34
+ 2322 01df 0100     		.2byte	0x1
+ 2323 01e1 50       		.byte	0x50
+ 2324 01e2 0C000000 		.4byte	.LVL34
+ 2325 01e6 0E000000 		.4byte	.LVL35
+ 2326 01ea 0400     		.2byte	0x4
+ 2327 01ec F3       		.byte	0xf3
+ 2328 01ed 01       		.uleb128 0x1
+ 2329 01ee 50       		.byte	0x50
+ 2330 01ef 9F       		.byte	0x9f
+ 2331 01f0 0E000000 		.4byte	.LVL35
+ 2332 01f4 1A000000 		.4byte	.LVL36
+ 2333 01f8 0100     		.2byte	0x1
+ 2334 01fa 50       		.byte	0x50
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 47
+
+
+ 2335 01fb 1A000000 		.4byte	.LVL36
+ 2336 01ff 1C000000 		.4byte	.LVL37
+ 2337 0203 0400     		.2byte	0x4
+ 2338 0205 F3       		.byte	0xf3
+ 2339 0206 01       		.uleb128 0x1
+ 2340 0207 50       		.byte	0x50
+ 2341 0208 9F       		.byte	0x9f
+ 2342 0209 1C000000 		.4byte	.LVL37
+ 2343 020d 28000000 		.4byte	.LVL38
+ 2344 0211 0100     		.2byte	0x1
+ 2345 0213 50       		.byte	0x50
+ 2346 0214 28000000 		.4byte	.LVL38
+ 2347 0218 2A000000 		.4byte	.LVL39
+ 2348 021c 0400     		.2byte	0x4
+ 2349 021e F3       		.byte	0xf3
+ 2350 021f 01       		.uleb128 0x1
+ 2351 0220 50       		.byte	0x50
+ 2352 0221 9F       		.byte	0x9f
+ 2353 0222 2A000000 		.4byte	.LVL39
+ 2354 0226 2C000000 		.4byte	.LVL40
+ 2355 022a 0100     		.2byte	0x1
+ 2356 022c 50       		.byte	0x50
+ 2357 022d 2C000000 		.4byte	.LVL40
+ 2358 0231 30000000 		.4byte	.LFE2
+ 2359 0235 0400     		.2byte	0x4
+ 2360 0237 F3       		.byte	0xf3
+ 2361 0238 01       		.uleb128 0x1
+ 2362 0239 50       		.byte	0x50
+ 2363 023a 9F       		.byte	0x9f
+ 2364 023b 00000000 		.4byte	0
+ 2365 023f 00000000 		.4byte	0
+ 2366              	.LLST10:
+ 2367 0243 00000000 		.4byte	.LVL41
+ 2368 0247 16000000 		.4byte	.LVL43
+ 2369 024b 0100     		.2byte	0x1
+ 2370 024d 50       		.byte	0x50
+ 2371 024e 16000000 		.4byte	.LVL43
+ 2372 0252 36000000 		.4byte	.LVL52
+ 2373 0256 0100     		.2byte	0x1
+ 2374 0258 56       		.byte	0x56
+ 2375 0259 00000000 		.4byte	0
+ 2376 025d 00000000 		.4byte	0
+ 2377              	.LLST11:
+ 2378 0261 00000000 		.4byte	.LVL41
+ 2379 0265 16000000 		.4byte	.LVL43
+ 2380 0269 0100     		.2byte	0x1
+ 2381 026b 51       		.byte	0x51
+ 2382 026c 16000000 		.4byte	.LVL43
+ 2383 0270 36000000 		.4byte	.LVL54
+ 2384 0274 0100     		.2byte	0x1
+ 2385 0276 58       		.byte	0x58
+ 2386 0277 36000000 		.4byte	.LVL54
+ 2387 027b 3E000000 		.4byte	.LFE3
+ 2388 027f 0400     		.2byte	0x4
+ 2389 0281 F3       		.byte	0xf3
+ 2390 0282 01       		.uleb128 0x1
+ 2391 0283 51       		.byte	0x51
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 48
+
+
+ 2392 0284 9F       		.byte	0x9f
+ 2393 0285 00000000 		.4byte	0
+ 2394 0289 00000000 		.4byte	0
+ 2395              	.LLST12:
+ 2396 028d 00000000 		.4byte	.LVL41
+ 2397 0291 16000000 		.4byte	.LVL43
+ 2398 0295 0100     		.2byte	0x1
+ 2399 0297 52       		.byte	0x52
+ 2400 0298 16000000 		.4byte	.LVL43
+ 2401 029c 36000000 		.4byte	.LVL53
+ 2402 02a0 0100     		.2byte	0x1
+ 2403 02a2 57       		.byte	0x57
+ 2404 02a3 36000000 		.4byte	.LVL53
+ 2405 02a7 3E000000 		.4byte	.LFE3
+ 2406 02ab 0400     		.2byte	0x4
+ 2407 02ad F3       		.byte	0xf3
+ 2408 02ae 01       		.uleb128 0x1
+ 2409 02af 52       		.byte	0x52
+ 2410 02b0 9F       		.byte	0x9f
+ 2411 02b1 00000000 		.4byte	0
+ 2412 02b5 00000000 		.4byte	0
+ 2413              	.LLST13:
+ 2414 02b9 00000000 		.4byte	.LVL41
+ 2415 02bd 16000000 		.4byte	.LVL43
+ 2416 02c1 0100     		.2byte	0x1
+ 2417 02c3 53       		.byte	0x53
+ 2418 02c4 16000000 		.4byte	.LVL43
+ 2419 02c8 36000000 		.4byte	.LVL55
+ 2420 02cc 0100     		.2byte	0x1
+ 2421 02ce 59       		.byte	0x59
+ 2422 02cf 36000000 		.4byte	.LVL55
+ 2423 02d3 3E000000 		.4byte	.LFE3
+ 2424 02d7 0100     		.2byte	0x1
+ 2425 02d9 53       		.byte	0x53
+ 2426 02da 00000000 		.4byte	0
+ 2427 02de 00000000 		.4byte	0
+ 2428              	.LLST14:
+ 2429 02e2 12000000 		.4byte	.LVL42
+ 2430 02e6 1E000000 		.4byte	.LVL45
+ 2431 02ea 0100     		.2byte	0x1
+ 2432 02ec 55       		.byte	0x55
+ 2433 02ed 1E000000 		.4byte	.LVL45
+ 2434 02f1 22000000 		.4byte	.LVL47
+ 2435 02f5 0300     		.2byte	0x3
+ 2436 02f7 75       		.byte	0x75
+ 2437 02f8 01       		.sleb128 1
+ 2438 02f9 9F       		.byte	0x9f
+ 2439 02fa 22000000 		.4byte	.LVL47
+ 2440 02fe 36000000 		.4byte	.LVL51
+ 2441 0302 0100     		.2byte	0x1
+ 2442 0304 55       		.byte	0x55
+ 2443 0305 00000000 		.4byte	0
+ 2444 0309 00000000 		.4byte	0
+ 2445              	.LLST15:
+ 2446 030d 12000000 		.4byte	.LVL42
+ 2447 0311 16000000 		.4byte	.LVL43
+ 2448 0315 0200     		.2byte	0x2
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 49
+
+
+ 2449 0317 30       		.byte	0x30
+ 2450 0318 9F       		.byte	0x9f
+ 2451 0319 16000000 		.4byte	.LVL43
+ 2452 031d 1C000000 		.4byte	.LVL44
+ 2453 0321 0100     		.2byte	0x1
+ 2454 0323 54       		.byte	0x54
+ 2455 0324 1E000000 		.4byte	.LVL45
+ 2456 0328 36000000 		.4byte	.LVL50
+ 2457 032c 0100     		.2byte	0x1
+ 2458 032e 54       		.byte	0x54
+ 2459 032f 36000000 		.4byte	.LVL50
+ 2460 0333 3E000000 		.4byte	.LFE3
+ 2461 0337 0200     		.2byte	0x2
+ 2462 0339 73       		.byte	0x73
+ 2463 033a 00       		.sleb128 0
+ 2464 033b 00000000 		.4byte	0
+ 2465 033f 00000000 		.4byte	0
+ 2466              	.LLST16:
+ 2467 0343 16000000 		.4byte	.LVL43
+ 2468 0347 22000000 		.4byte	.LVL47
+ 2469 034b 0100     		.2byte	0x1
+ 2470 034d 50       		.byte	0x50
+ 2471 034e 28000000 		.4byte	.LVL48
+ 2472 0352 36000000 		.4byte	.LVL49
+ 2473 0356 0100     		.2byte	0x1
+ 2474 0358 50       		.byte	0x50
+ 2475 0359 00000000 		.4byte	0
+ 2476 035d 00000000 		.4byte	0
+ 2477              	.LLST17:
+ 2478 0361 00000000 		.4byte	.LVL56
+ 2479 0365 2E000000 		.4byte	.LVL65
+ 2480 0369 0100     		.2byte	0x1
+ 2481 036b 50       		.byte	0x50
+ 2482 036c 2E000000 		.4byte	.LVL65
+ 2483 0370 4E000000 		.4byte	.LVL74
+ 2484 0374 0100     		.2byte	0x1
+ 2485 0376 55       		.byte	0x55
+ 2486 0377 4E000000 		.4byte	.LVL74
+ 2487 037b 50000000 		.4byte	.LFE4
+ 2488 037f 0400     		.2byte	0x4
+ 2489 0381 F3       		.byte	0xf3
+ 2490 0382 01       		.uleb128 0x1
+ 2491 0383 50       		.byte	0x50
+ 2492 0384 9F       		.byte	0x9f
+ 2493 0385 00000000 		.4byte	0
+ 2494 0389 00000000 		.4byte	0
+ 2495              	.LLST18:
+ 2496 038d 00000000 		.4byte	.LVL56
+ 2497 0391 1C000000 		.4byte	.LVL61
+ 2498 0395 0100     		.2byte	0x1
+ 2499 0397 51       		.byte	0x51
+ 2500 0398 1C000000 		.4byte	.LVL61
+ 2501 039c 4E000000 		.4byte	.LVL76
+ 2502 03a0 0100     		.2byte	0x1
+ 2503 03a2 57       		.byte	0x57
+ 2504 03a3 4E000000 		.4byte	.LVL76
+ 2505 03a7 50000000 		.4byte	.LFE4
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 50
+
+
+ 2506 03ab 0400     		.2byte	0x4
+ 2507 03ad F3       		.byte	0xf3
+ 2508 03ae 01       		.uleb128 0x1
+ 2509 03af 51       		.byte	0x51
+ 2510 03b0 9F       		.byte	0x9f
+ 2511 03b1 00000000 		.4byte	0
+ 2512 03b5 00000000 		.4byte	0
+ 2513              	.LLST19:
+ 2514 03b9 00000000 		.4byte	.LVL56
+ 2515 03bd 1E000000 		.4byte	.LVL62
+ 2516 03c1 0100     		.2byte	0x1
+ 2517 03c3 52       		.byte	0x52
+ 2518 03c4 1E000000 		.4byte	.LVL62
+ 2519 03c8 2E000000 		.4byte	.LVL65
+ 2520 03cc 0100     		.2byte	0x1
+ 2521 03ce 52       		.byte	0x52
+ 2522 03cf 2E000000 		.4byte	.LVL65
+ 2523 03d3 36000000 		.4byte	.LVL67
+ 2524 03d7 0100     		.2byte	0x1
+ 2525 03d9 56       		.byte	0x56
+ 2526 03da 36000000 		.4byte	.LVL67
+ 2527 03de 38000000 		.4byte	.LVL68
+ 2528 03e2 0100     		.2byte	0x1
+ 2529 03e4 52       		.byte	0x52
+ 2530 03e5 38000000 		.4byte	.LVL68
+ 2531 03e9 3E000000 		.4byte	.LVL69
+ 2532 03ed 0100     		.2byte	0x1
+ 2533 03ef 56       		.byte	0x56
+ 2534 03f0 00000000 		.4byte	0
+ 2535 03f4 00000000 		.4byte	0
+ 2536              	.LLST20:
+ 2537 03f8 00000000 		.4byte	.LVL56
+ 2538 03fc 10000000 		.4byte	.LVL57
+ 2539 0400 0100     		.2byte	0x1
+ 2540 0402 53       		.byte	0x53
+ 2541 0403 10000000 		.4byte	.LVL57
+ 2542 0407 14000000 		.4byte	.LVL58
+ 2543 040b 0400     		.2byte	0x4
+ 2544 040d F3       		.byte	0xf3
+ 2545 040e 01       		.uleb128 0x1
+ 2546 040f 53       		.byte	0x53
+ 2547 0410 9F       		.byte	0x9f
+ 2548 0411 14000000 		.4byte	.LVL58
+ 2549 0415 16000000 		.4byte	.LVL59
+ 2550 0419 0100     		.2byte	0x1
+ 2551 041b 53       		.byte	0x53
+ 2552 041c 16000000 		.4byte	.LVL59
+ 2553 0420 50000000 		.4byte	.LFE4
+ 2554 0424 0400     		.2byte	0x4
+ 2555 0426 F3       		.byte	0xf3
+ 2556 0427 01       		.uleb128 0x1
+ 2557 0428 53       		.byte	0x53
+ 2558 0429 9F       		.byte	0x9f
+ 2559 042a 00000000 		.4byte	0
+ 2560 042e 00000000 		.4byte	0
+ 2561              	.LLST21:
+ 2562 0432 00000000 		.4byte	.LVL56
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 51
+
+
+ 2563 0436 3E000000 		.4byte	.LVL69
+ 2564 043a 0200     		.2byte	0x2
+ 2565 043c 91       		.byte	0x91
+ 2566 043d 00       		.sleb128 0
+ 2567 043e 3E000000 		.4byte	.LVL69
+ 2568 0442 44000000 		.4byte	.LVL71
+ 2569 0446 0100     		.2byte	0x1
+ 2570 0448 56       		.byte	0x56
+ 2571 0449 44000000 		.4byte	.LVL71
+ 2572 044d 46000000 		.4byte	.LVL72
+ 2573 0451 0100     		.2byte	0x1
+ 2574 0453 54       		.byte	0x54
+ 2575 0454 46000000 		.4byte	.LVL72
+ 2576 0458 4E000000 		.4byte	.LVL75
+ 2577 045c 0100     		.2byte	0x1
+ 2578 045e 56       		.byte	0x56
+ 2579 045f 00000000 		.4byte	0
+ 2580 0463 00000000 		.4byte	0
+ 2581              	.LLST22:
+ 2582 0467 3E000000 		.4byte	.LVL69
+ 2583 046b 41000000 		.4byte	.LVL70-1
+ 2584 046f 0100     		.2byte	0x1
+ 2585 0471 51       		.byte	0x51
+ 2586 0472 48000000 		.4byte	.LVL73
+ 2587 0476 50000000 		.4byte	.LFE4
+ 2588 047a 0100     		.2byte	0x1
+ 2589 047c 51       		.byte	0x51
+ 2590 047d 00000000 		.4byte	0
+ 2591 0481 00000000 		.4byte	0
+ 2592              	.LLST23:
+ 2593 0485 18000000 		.4byte	.LVL60
+ 2594 0489 1C000000 		.4byte	.LVL61
+ 2595 048d 0100     		.2byte	0x1
+ 2596 048f 54       		.byte	0x54
+ 2597 0490 1C000000 		.4byte	.LVL61
+ 2598 0494 20000000 		.4byte	.LVL63
+ 2599 0498 0100     		.2byte	0x1
+ 2600 049a 51       		.byte	0x51
+ 2601 049b 20000000 		.4byte	.LVL63
+ 2602 049f 22000000 		.4byte	.LVL64
+ 2603 04a3 0100     		.2byte	0x1
+ 2604 04a5 53       		.byte	0x53
+ 2605 04a6 22000000 		.4byte	.LVL64
+ 2606 04aa 2E000000 		.4byte	.LVL65
+ 2607 04ae 0100     		.2byte	0x1
+ 2608 04b0 51       		.byte	0x51
+ 2609 04b1 00000000 		.4byte	0
+ 2610 04b5 00000000 		.4byte	0
+ 2611              	.LLST24:
+ 2612 04b9 00000000 		.4byte	.LVL78
+ 2613 04bd 12000000 		.4byte	.LVL79
+ 2614 04c1 0100     		.2byte	0x1
+ 2615 04c3 50       		.byte	0x50
+ 2616 04c4 12000000 		.4byte	.LVL79
+ 2617 04c8 14010000 		.4byte	.LVL120
+ 2618 04cc 0100     		.2byte	0x1
+ 2619 04ce 54       		.byte	0x54
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 52
+
+
+ 2620 04cf 14010000 		.4byte	.LVL120
+ 2621 04d3 1A010000 		.4byte	.LFE5
+ 2622 04d7 0400     		.2byte	0x4
+ 2623 04d9 F3       		.byte	0xf3
+ 2624 04da 01       		.uleb128 0x1
+ 2625 04db 50       		.byte	0x50
+ 2626 04dc 9F       		.byte	0x9f
+ 2627 04dd 00000000 		.4byte	0
+ 2628 04e1 00000000 		.4byte	0
+ 2629              	.LLST25:
+ 2630 04e5 00000000 		.4byte	.LVL78
+ 2631 04e9 12000000 		.4byte	.LVL79
+ 2632 04ed 0100     		.2byte	0x1
+ 2633 04ef 51       		.byte	0x51
+ 2634 04f0 12000000 		.4byte	.LVL79
+ 2635 04f4 14010000 		.4byte	.LVL121
+ 2636 04f8 0100     		.2byte	0x1
+ 2637 04fa 57       		.byte	0x57
+ 2638 04fb 14010000 		.4byte	.LVL121
+ 2639 04ff 1A010000 		.4byte	.LFE5
+ 2640 0503 0400     		.2byte	0x4
+ 2641 0505 F3       		.byte	0xf3
+ 2642 0506 01       		.uleb128 0x1
+ 2643 0507 51       		.byte	0x51
+ 2644 0508 9F       		.byte	0x9f
+ 2645 0509 00000000 		.4byte	0
+ 2646 050d 00000000 		.4byte	0
+ 2647              	.LLST26:
+ 2648 0511 00000000 		.4byte	.LVL78
+ 2649 0515 12000000 		.4byte	.LVL79
+ 2650 0519 0100     		.2byte	0x1
+ 2651 051b 52       		.byte	0x52
+ 2652 051c 12000000 		.4byte	.LVL79
+ 2653 0520 1A010000 		.4byte	.LFE5
+ 2654 0524 0400     		.2byte	0x4
+ 2655 0526 F3       		.byte	0xf3
+ 2656 0527 01       		.uleb128 0x1
+ 2657 0528 52       		.byte	0x52
+ 2658 0529 9F       		.byte	0x9f
+ 2659 052a 00000000 		.4byte	0
+ 2660 052e 00000000 		.4byte	0
+ 2661              	.LLST27:
+ 2662 0532 00000000 		.4byte	.LVL78
+ 2663 0536 12000000 		.4byte	.LVL79
+ 2664 053a 0100     		.2byte	0x1
+ 2665 053c 53       		.byte	0x53
+ 2666 053d 7A000000 		.4byte	.LVL89
+ 2667 0541 7C000000 		.4byte	.LVL90
+ 2668 0545 0100     		.2byte	0x1
+ 2669 0547 55       		.byte	0x55
+ 2670 0548 9E000000 		.4byte	.LVL94
+ 2671 054c A0000000 		.4byte	.LVL95
+ 2672 0550 0100     		.2byte	0x1
+ 2673 0552 55       		.byte	0x55
+ 2674 0553 C4000000 		.4byte	.LVL100
+ 2675 0557 C6000000 		.4byte	.LVL101
+ 2676 055b 0100     		.2byte	0x1
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 53
+
+
+ 2677 055d 55       		.byte	0x55
+ 2678 055e E2000000 		.4byte	.LVL105
+ 2679 0562 E4000000 		.4byte	.LVL106
+ 2680 0566 0100     		.2byte	0x1
+ 2681 0568 55       		.byte	0x55
+ 2682 0569 EE000000 		.4byte	.LVL110
+ 2683 056d F0000000 		.4byte	.LVL111
+ 2684 0571 0100     		.2byte	0x1
+ 2685 0573 55       		.byte	0x55
+ 2686 0574 04010000 		.4byte	.LVL116
+ 2687 0578 06010000 		.4byte	.LVL117
+ 2688 057c 0100     		.2byte	0x1
+ 2689 057e 53       		.byte	0x53
+ 2690 057f 00000000 		.4byte	0
+ 2691 0583 00000000 		.4byte	0
+ 2692              	.LLST28:
+ 2693 0587 12000000 		.4byte	.LVL79
+ 2694 058b 19000000 		.4byte	.LVL80-1
+ 2695 058f 0100     		.2byte	0x1
+ 2696 0591 51       		.byte	0x51
+ 2697 0592 1C000000 		.4byte	.LVL81
+ 2698 0596 1E000000 		.4byte	.LVL82
+ 2699 059a 0100     		.2byte	0x1
+ 2700 059c 51       		.byte	0x51
+ 2701 059d 1E000000 		.4byte	.LVL82
+ 2702 05a1 20000000 		.4byte	.LVL83
+ 2703 05a5 0200     		.2byte	0x2
+ 2704 05a7 73       		.byte	0x73
+ 2705 05a8 00       		.sleb128 0
+ 2706 05a9 26000000 		.4byte	.LVL84
+ 2707 05ad 49000000 		.4byte	.LVL88-1
+ 2708 05b1 0100     		.2byte	0x1
+ 2709 05b3 50       		.byte	0x50
+ 2710 05b4 4A000000 		.4byte	.LVL88
+ 2711 05b8 7A000000 		.4byte	.LVL89
+ 2712 05bc 0100     		.2byte	0x1
+ 2713 05be 50       		.byte	0x50
+ 2714 05bf 98000000 		.4byte	.LVL93
+ 2715 05c3 9E000000 		.4byte	.LVL94
+ 2716 05c7 0100     		.2byte	0x1
+ 2717 05c9 50       		.byte	0x50
+ 2718 05ca B8000000 		.4byte	.LVL98
+ 2719 05ce BE000000 		.4byte	.LVL99
+ 2720 05d2 0100     		.2byte	0x1
+ 2721 05d4 50       		.byte	0x50
+ 2722 05d5 E0000000 		.4byte	.LVL104
+ 2723 05d9 E6000000 		.4byte	.LVL107
+ 2724 05dd 0100     		.2byte	0x1
+ 2725 05df 50       		.byte	0x50
+ 2726 05e0 EA000000 		.4byte	.LVL109
+ 2727 05e4 F8000000 		.4byte	.LVL112
+ 2728 05e8 0100     		.2byte	0x1
+ 2729 05ea 50       		.byte	0x50
+ 2730 05eb FE000000 		.4byte	.LVL114
+ 2731 05ef 02010000 		.4byte	.LVL115
+ 2732 05f3 0100     		.2byte	0x1
+ 2733 05f5 50       		.byte	0x50
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 54
+
+
+ 2734 05f6 0C010000 		.4byte	.LVL118
+ 2735 05fa 12010000 		.4byte	.LVL119
+ 2736 05fe 0100     		.2byte	0x1
+ 2737 0600 51       		.byte	0x51
+ 2738 0601 00000000 		.4byte	0
+ 2739 0605 00000000 		.4byte	0
+ 2740              	.LLST29:
+ 2741 0609 1C000000 		.4byte	.LVL81
+ 2742 060d 30000000 		.4byte	.LVL85
+ 2743 0611 0200     		.2byte	0x2
+ 2744 0613 30       		.byte	0x30
+ 2745 0614 9F       		.byte	0x9f
+ 2746 0615 30000000 		.4byte	.LVL85
+ 2747 0619 34000000 		.4byte	.LVL86
+ 2748 061d 0200     		.2byte	0x2
+ 2749 061f 31       		.byte	0x31
+ 2750 0620 9F       		.byte	0x9f
+ 2751 0621 34000000 		.4byte	.LVL86
+ 2752 0625 36000000 		.4byte	.LVL87
+ 2753 0629 0200     		.2byte	0x2
+ 2754 062b 30       		.byte	0x30
+ 2755 062c 9F       		.byte	0x9f
+ 2756 062d 36000000 		.4byte	.LVL87
+ 2757 0631 04010000 		.4byte	.LVL116
+ 2758 0635 0100     		.2byte	0x1
+ 2759 0637 56       		.byte	0x56
+ 2760 0638 00000000 		.4byte	0
+ 2761 063c 00000000 		.4byte	0
+ 2762              	.LLST30:
+ 2763 0640 00000000 		.4byte	.LVL125
+ 2764 0644 12000000 		.4byte	.LVL126
+ 2765 0648 0100     		.2byte	0x1
+ 2766 064a 50       		.byte	0x50
+ 2767 064b 12000000 		.4byte	.LVL126
+ 2768 064f 15000000 		.4byte	.LVL127-1
+ 2769 0653 0200     		.2byte	0x2
+ 2770 0655 70       		.byte	0x70
+ 2771 0656 00       		.sleb128 0
+ 2772 0657 15000000 		.4byte	.LVL127-1
+ 2773 065b 1A000000 		.4byte	.LVL128
+ 2774 065f 0200     		.2byte	0x2
+ 2775 0661 91       		.byte	0x91
+ 2776 0662 4C       		.sleb128 -52
+ 2777 0663 1A000000 		.4byte	.LVL128
+ 2778 0667 1D000000 		.4byte	.LVL129-1
+ 2779 066b 0200     		.2byte	0x2
+ 2780 066d 70       		.byte	0x70
+ 2781 066e 00       		.sleb128 0
+ 2782 066f 1D000000 		.4byte	.LVL129-1
+ 2783 0673 2C000000 		.4byte	.LFE9
+ 2784 0677 0200     		.2byte	0x2
+ 2785 0679 91       		.byte	0x91
+ 2786 067a 4C       		.sleb128 -52
+ 2787 067b 00000000 		.4byte	0
+ 2788 067f 00000000 		.4byte	0
+ 2789              		.section	.debug_aranges,"",%progbits
+ 2790 0000 64000000 		.4byte	0x64
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 55
+
+
+ 2791 0004 0200     		.2byte	0x2
+ 2792 0006 00000000 		.4byte	.Ldebug_info0
+ 2793 000a 04       		.byte	0x4
+ 2794 000b 00       		.byte	0
+ 2795 000c 0000     		.2byte	0
+ 2796 000e 0000     		.2byte	0
+ 2797 0010 00000000 		.4byte	.LFB0
+ 2798 0014 8E000000 		.4byte	.LFE0-.LFB0
+ 2799 0018 00000000 		.4byte	.LFB1
+ 2800 001c 1A000000 		.4byte	.LFE1-.LFB1
+ 2801 0020 00000000 		.4byte	.LFB2
+ 2802 0024 30000000 		.4byte	.LFE2-.LFB2
+ 2803 0028 00000000 		.4byte	.LFB3
+ 2804 002c 3E000000 		.4byte	.LFE3-.LFB3
+ 2805 0030 00000000 		.4byte	.LFB4
+ 2806 0034 50000000 		.4byte	.LFE4-.LFB4
+ 2807 0038 00000000 		.4byte	.LFB8
+ 2808 003c 0A000000 		.4byte	.LFE8-.LFB8
+ 2809 0040 00000000 		.4byte	.LFB5
+ 2810 0044 1A010000 		.4byte	.LFE5-.LFB5
+ 2811 0048 00000000 		.4byte	.LFB6
+ 2812 004c 0C000000 		.4byte	.LFE6-.LFB6
+ 2813 0050 00000000 		.4byte	.LFB7
+ 2814 0054 24000000 		.4byte	.LFE7-.LFB7
+ 2815 0058 00000000 		.4byte	.LFB9
+ 2816 005c 2C000000 		.4byte	.LFE9-.LFB9
+ 2817 0060 00000000 		.4byte	0
+ 2818 0064 00000000 		.4byte	0
+ 2819              		.section	.debug_ranges,"",%progbits
+ 2820              	.Ldebug_ranges0:
+ 2821 0000 00000000 		.4byte	.LFB0
+ 2822 0004 8E000000 		.4byte	.LFE0
+ 2823 0008 00000000 		.4byte	.LFB1
+ 2824 000c 1A000000 		.4byte	.LFE1
+ 2825 0010 00000000 		.4byte	.LFB2
+ 2826 0014 30000000 		.4byte	.LFE2
+ 2827 0018 00000000 		.4byte	.LFB3
+ 2828 001c 3E000000 		.4byte	.LFE3
+ 2829 0020 00000000 		.4byte	.LFB4
+ 2830 0024 50000000 		.4byte	.LFE4
+ 2831 0028 00000000 		.4byte	.LFB8
+ 2832 002c 0A000000 		.4byte	.LFE8
+ 2833 0030 00000000 		.4byte	.LFB5
+ 2834 0034 1A010000 		.4byte	.LFE5
+ 2835 0038 00000000 		.4byte	.LFB6
+ 2836 003c 0C000000 		.4byte	.LFE6
+ 2837 0040 00000000 		.4byte	.LFB7
+ 2838 0044 24000000 		.4byte	.LFE7
+ 2839 0048 00000000 		.4byte	.LFB9
+ 2840 004c 2C000000 		.4byte	.LFE9
+ 2841 0050 00000000 		.4byte	0
+ 2842 0054 00000000 		.4byte	0
+ 2843              		.section	.debug_line,"",%progbits
+ 2844              	.Ldebug_line0:
+ 2845 0000 F9010000 		.section	.debug_str,"MS",%progbits,1
+ 2845      0200BE00 
+ 2845      00000201 
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 56
+
+
+ 2845      FB0E0D00 
+ 2845      01010101 
+ 2846              	.LASF11:
+ 2847 0000 70757466 		.ascii	"putf\000"
+ 2847      00
+ 2848              	.LASF0:
+ 2849 0005 5F5F676E 		.ascii	"__gnuc_va_list\000"
+ 2849      75635F76 
+ 2849      615F6C69 
+ 2849      737400
+ 2850              	.LASF2:
+ 2851 0014 70757463 		.ascii	"putcf\000"
+ 2851      6600
+ 2852              	.LASF15:
+ 2853 001a 696E6974 		.ascii	"init_printf\000"
+ 2853      5F707269 
+ 2853      6E746600 
+ 2854              	.LASF3:
+ 2855 0026 62617365 		.ascii	"base\000"
+ 2855      00
+ 2856              	.LASF12:
+ 2857 002b 70757463 		.ascii	"putcp\000"
+ 2857      7000
+ 2858              	.LASF1:
+ 2859 0031 76615F6C 		.ascii	"va_list\000"
+ 2859      69737400 
+ 2860              	.LASF14:
+ 2861 0039 7466705F 		.ascii	"tfp_format\000"
+ 2861      666F726D 
+ 2861      617400
+ 2862              	.LASF19:
+ 2863 0044 7374646F 		.ascii	"stdout_putp\000"
+ 2863      75745F70 
+ 2863      75747000 
+ 2864              	.LASF17:
+ 2865 0050 7466705F 		.ascii	"tfp_sprintf\000"
+ 2865      73707269 
+ 2865      6E746600 
+ 2866              	.LASF5:
+ 2867 005c 756E7369 		.ascii	"unsigned int\000"
+ 2867      676E6564 
+ 2867      20696E74 
+ 2867      00
+ 2868              	.LASF8:
+ 2869 0069 64696769 		.ascii	"digit\000"
+ 2869      7400
+ 2870              	.LASF4:
+ 2871 006f 63686172 		.ascii	"char\000"
+ 2871      00
+ 2872              	.LASF22:
+ 2873 0074 433A5C55 		.ascii	"C:\\Users\\boise\\Documents\\PSoC Creator\\VoltMete"
+ 2873      73657273 
+ 2873      5C626F69 
+ 2873      73655C44 
+ 2873      6F63756D 
+ 2874 00a2 725C4361 		.ascii	"r\\CarVolt1.cydsn\000"
+ 2874      72566F6C 
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 57
+
+
+ 2874      74312E63 
+ 2874      7964736E 
+ 2874      00
+ 2875              	.LASF24:
+ 2876 00b3 5F5F6170 		.ascii	"__ap\000"
+ 2876      00
+ 2877              	.LASF20:
+ 2878 00b8 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 2878      43313120 
+ 2878      352E342E 
+ 2878      31203230 
+ 2878      31363036 
+ 2879 00eb 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 2879      20726576 
+ 2879      6973696F 
+ 2879      6E203233 
+ 2879      37373135 
+ 2880 011e 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 2880      66756E63 
+ 2880      74696F6E 
+ 2880      2D736563 
+ 2880      74696F6E 
+ 2881              	.LASF16:
+ 2882 0146 7466705F 		.ascii	"tfp_printf\000"
+ 2882      7072696E 
+ 2882      746600
+ 2883              	.LASF13:
+ 2884 0151 73697A65 		.ascii	"sizetype\000"
+ 2884      74797065 
+ 2884      00
+ 2885              	.LASF23:
+ 2886 015a 5F5F7661 		.ascii	"__va_list\000"
+ 2886      5F6C6973 
+ 2886      7400
+ 2887              	.LASF6:
+ 2888 0164 75693261 		.ascii	"ui2a\000"
+ 2888      00
+ 2889              	.LASF7:
+ 2890 0169 6E756D70 		.ascii	"nump\000"
+ 2890      00
+ 2891              	.LASF9:
+ 2892 016e 70757463 		.ascii	"putchw\000"
+ 2892      687700
+ 2893              	.LASF10:
+ 2894 0175 70757470 		.ascii	"putp\000"
+ 2894      00
+ 2895              	.LASF25:
+ 2896 017a 61626F72 		.ascii	"abort\000"
+ 2896      7400
+ 2897              	.LASF21:
+ 2898 0180 74696E79 		.ascii	"tinyprintf\\API\\printf.c\000"
+ 2898      7072696E 
+ 2898      74665C41 
+ 2898      50495C70 
+ 2898      72696E74 
+ 2899              	.LASF18:
+ 2900 0198 7374646F 		.ascii	"stdout_putf\000"
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccatBvcZ.s 			page 58
+
+
+ 2900      75745F70 
+ 2900      75746600 
+ 2901              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

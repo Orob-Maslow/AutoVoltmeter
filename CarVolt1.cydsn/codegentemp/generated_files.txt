@@ -32,11 +32,12 @@
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\ADC.h" value="HEADER;;;;;ADC" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\ADC_PM.c" value="SOURCE_C;CortexM0;;;;ADC" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\ADC_INT.c" value="SOURCE_C;CortexM0;;;;ADC" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\PWM.c" value="SOURCE_C;CortexM0;;;;PWM" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\PWM.h" value="HEADER;;;;;PWM" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\PWM_PM.c" value="SOURCE_C;CortexM0;;;;PWM" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\OLED.h" value="HEADER;;;;;OLED" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\OLED.c" value="SOURCE_C;CortexM0;;;;OLED" />
+  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\TX_AsmGnu.s" value="SOURCE_ASM;CortexM0,CortexM0p,CortexM3,CortexM4,CortexM7;;b98f980c-3bd1-4fc7-a887-c56a20a46fdd;;TX" />
+  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\TX_AsmRv.s" value="SOURCE_ASM;CortexM0,CortexM0p,CortexM3,CortexM4,CortexM7;;fdb8e1ae-f83a-46cf-9446-1d703716f38a;;TX" />
+  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\TX.c" value="SOURCE_C;CortexM0;;;;TX" />
+  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\TX.h" value="HEADER;;;;;TX" />
+  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\TX_PVT.h" value="HEADER;;;;;TX" />
+  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\TX_AsmIar.s" value="SOURCE_ASM;CortexM0,CortexM0p,CortexM3,CortexM4,CortexM7;;e9305a93-d091-4da5-bdc7-2813049dcdbf;;TX" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\Battery.c" value="SOURCE_C;CortexM0;;;;Battery" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\Battery.h" value="HEADER;;;;;Battery" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\Battery_aliases.h" value="HEADER;;;;;Battery" />
@@ -53,14 +54,8 @@
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\Inside.h" value="HEADER;;;;;Inside" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\Inside_aliases.h" value="HEADER;;;;;Inside" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\Inside_PM.c" value="SOURCE_C;CortexM0;;;;Inside" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\LED.c" value="SOURCE_C;CortexM0;;;;LED" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\LED.h" value="HEADER;;;;;LED" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\LED_aliases.h" value="HEADER;;;;;LED" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\LED_PM.c" value="SOURCE_C;CortexM0;;;;LED" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\Bootloadable_1.c" value="SOURCE_C;CortexM0;;;;Bootloadable_1" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\Bootloadable_1.h" value="HEADER;;;;;Bootloadable_1" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\Clock.c" value="SOURCE_C;CortexM0;;;;Clock" />
-  <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\Clock.h" value="HEADER;;;;;Clock" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\I2C_SCBCLK.c" value="SOURCE_C;CortexM0;;;;I2C_SCBCLK" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\I2C_SCBCLK.h" value="HEADER;;;;;I2C_SCBCLK" />
   <file name="C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\codegentemp\I2C_sda.c" value="SOURCE_C;CortexM0;;;;I2C_sda" />

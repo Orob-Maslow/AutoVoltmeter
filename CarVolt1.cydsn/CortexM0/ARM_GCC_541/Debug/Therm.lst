@@ -1,0 +1,1384 @@
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"Therm.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.global	__aeabi_idiv
+  20              		.section	.text.Therm_GetResistance,"ax",%progbits
+  21              		.align	2
+  22              		.global	Therm_GetResistance
+  23              		.code	16
+  24              		.thumb_func
+  25              		.type	Therm_GetResistance, %function
+  26              	Therm_GetResistance:
+  27              	.LFB0:
+  28              		.file 1 "Generated_Source\\PSoC4\\Therm.c"
+   1:Generated_Source\PSoC4/Therm.c **** /*******************************************************************************
+   2:Generated_Source\PSoC4/Therm.c **** * File Name: Therm.c
+   3:Generated_Source\PSoC4/Therm.c **** * Version 1.20
+   4:Generated_Source\PSoC4/Therm.c **** *
+   5:Generated_Source\PSoC4/Therm.c **** * Description:
+   6:Generated_Source\PSoC4/Therm.c **** *  This file provides the source code to the API for the ThermistorCalc
+   7:Generated_Source\PSoC4/Therm.c **** *  Component.
+   8:Generated_Source\PSoC4/Therm.c **** *
+   9:Generated_Source\PSoC4/Therm.c **** * Note:
+  10:Generated_Source\PSoC4/Therm.c **** *  None.
+  11:Generated_Source\PSoC4/Therm.c **** *
+  12:Generated_Source\PSoC4/Therm.c **** ********************************************************************************
+  13:Generated_Source\PSoC4/Therm.c **** * Copyright 2013, Cypress Semiconductor Corporation.  All rights reserved.
+  14:Generated_Source\PSoC4/Therm.c **** * You may use this file only in accordance with the license, terms, conditions,
+  15:Generated_Source\PSoC4/Therm.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  16:Generated_Source\PSoC4/Therm.c **** * the software package with which this file was provided.
+  17:Generated_Source\PSoC4/Therm.c **** *******************************************************************************/
+  18:Generated_Source\PSoC4/Therm.c **** 
+  19:Generated_Source\PSoC4/Therm.c **** #include "Therm.h"
+  20:Generated_Source\PSoC4/Therm.c **** 
+  21:Generated_Source\PSoC4/Therm.c **** 
+  22:Generated_Source\PSoC4/Therm.c **** /*******************************************************************************
+  23:Generated_Source\PSoC4/Therm.c **** * Function Name: Therm_GetResistance
+  24:Generated_Source\PSoC4/Therm.c **** ********************************************************************************
+  25:Generated_Source\PSoC4/Therm.c **** *
+  26:Generated_Source\PSoC4/Therm.c **** * Summary:
+  27:Generated_Source\PSoC4/Therm.c **** *  The digital values of the voltages across the reference resistor and the
+  28:Generated_Source\PSoC4/Therm.c **** *  thermistor are passed to this function as parameters. The function returns
+  29:Generated_Source\PSoC4/Therm.c **** *  the resistance, based on the voltage values.
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 2
+
+
+  30:Generated_Source\PSoC4/Therm.c **** *
+  31:Generated_Source\PSoC4/Therm.c **** * Parameters:
+  32:Generated_Source\PSoC4/Therm.c **** *  vReference: the voltage across the reference resistor;
+  33:Generated_Source\PSoC4/Therm.c **** *  vThermistor: the voltage across the thermistor.
+  34:Generated_Source\PSoC4/Therm.c **** *  The ratio of these two voltages is used by this function. Therefore, the
+  35:Generated_Source\PSoC4/Therm.c **** *  units for both parameters must be the same.
+  36:Generated_Source\PSoC4/Therm.c **** *
+  37:Generated_Source\PSoC4/Therm.c **** * Return:
+  38:Generated_Source\PSoC4/Therm.c **** *  The return value is the resistance across the thermistor. The value returned
+  39:Generated_Source\PSoC4/Therm.c **** *  is the resistance in Ohms.
+  40:Generated_Source\PSoC4/Therm.c **** *
+  41:Generated_Source\PSoC4/Therm.c **** *******************************************************************************/
+  42:Generated_Source\PSoC4/Therm.c **** uint32 Therm_GetResistance(int16 vReference, int16 vThermistor)
+  43:Generated_Source\PSoC4/Therm.c ****                                       
+  44:Generated_Source\PSoC4/Therm.c **** {
+  29              		.loc 1 44 0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              	.LVL0:
+  34 0000 10B5     		push	{r4, lr}
+  35              		.cfi_def_cfa_offset 8
+  36              		.cfi_offset 4, -8
+  37              		.cfi_offset 14, -4
+  38 0002 0200     		movs	r2, r0
+  45:Generated_Source\PSoC4/Therm.c ****     int32 resT;
+  46:Generated_Source\PSoC4/Therm.c ****     int16 temp;
+  47:Generated_Source\PSoC4/Therm.c **** 
+  48:Generated_Source\PSoC4/Therm.c ****     /* Calculate thermistor resistance from the voltages */
+  49:Generated_Source\PSoC4/Therm.c ****     resT = Therm_REF_RESISTOR * ((int32)vThermistor);
+  39              		.loc 1 49 0
+  40 0004 084B     		ldr	r3, .L4
+  41 0006 5943     		muls	r1, r3
+  42              	.LVL1:
+  50:Generated_Source\PSoC4/Therm.c ****     if (vReference < 0)
+  43              		.loc 1 50 0
+  44 0008 0028     		cmp	r0, #0
+  45 000a 05DA     		bge	.L2
+  51:Generated_Source\PSoC4/Therm.c ****     {
+  52:Generated_Source\PSoC4/Therm.c ****         temp = -vReference;
+  46              		.loc 1 52 0
+  47 000c 4042     		rsbs	r0, r0, #0
+  48              	.LVL2:
+  49 000e 80B2     		uxth	r0, r0
+  50              	.LVL3:
+  53:Generated_Source\PSoC4/Therm.c ****         temp = (int16)((uint16)((uint16)temp >> 1u));
+  51              		.loc 1 53 0
+  52 0010 4008     		lsrs	r0, r0, #1
+  53              	.LVL4:
+  54:Generated_Source\PSoC4/Therm.c ****         temp = -temp;
+  54              		.loc 1 54 0
+  55 0012 4342     		rsbs	r3, r0, #0
+  56 0014 18B2     		sxth	r0, r3
+  57              	.LVL5:
+  58 0016 01E0     		b	.L3
+  59              	.LVL6:
+  60              	.L2:
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 3
+
+
+  55:Generated_Source\PSoC4/Therm.c ****     }
+  56:Generated_Source\PSoC4/Therm.c ****     else
+  57:Generated_Source\PSoC4/Therm.c ****     {
+  58:Generated_Source\PSoC4/Therm.c ****         temp = (int16)((uint16)((uint16)vReference >> 1u));
+  61              		.loc 1 58 0
+  62 0018 80B2     		uxth	r0, r0
+  63 001a 4008     		lsrs	r0, r0, #1
+  64              	.LVL7:
+  65              	.L3:
+  59:Generated_Source\PSoC4/Therm.c ****     }
+  60:Generated_Source\PSoC4/Therm.c ****     resT += temp;
+  66              		.loc 1 60 0
+  67 001c 4018     		adds	r0, r0, r1
+  68              	.LVL8:
+  61:Generated_Source\PSoC4/Therm.c ****     resT /= vReference;
+  69              		.loc 1 61 0
+  70 001e 1100     		movs	r1, r2
+  71 0020 FFF7FEFF 		bl	__aeabi_idiv
+  72              	.LVL9:
+  62:Generated_Source\PSoC4/Therm.c **** 
+  63:Generated_Source\PSoC4/Therm.c ****     /* The ordering of Reference resistor value is specifically designed to keep the result from ov
+  64:Generated_Source\PSoC4/Therm.c ****     return ((uint32)((uint32)resT << Therm_REF_RES_SHIFT));
+  65:Generated_Source\PSoC4/Therm.c **** }
+  73              		.loc 1 65 0
+  74              		@ sp needed
+  75 0024 10BD     		pop	{r4, pc}
+  76              	.L5:
+  77 0026 C046     		.align	2
+  78              	.L4:
+  79 0028 10270000 		.word	10000
+  80              		.cfi_endproc
+  81              	.LFE0:
+  82              		.size	Therm_GetResistance, .-Therm_GetResistance
+  83              		.section	.text.Therm_GetTemperature,"ax",%progbits
+  84              		.align	2
+  85              		.global	Therm_GetTemperature
+  86              		.code	16
+  87              		.thumb_func
+  88              		.type	Therm_GetTemperature, %function
+  89              	Therm_GetTemperature:
+  90              	.LFB1:
+  66:Generated_Source\PSoC4/Therm.c **** 
+  67:Generated_Source\PSoC4/Therm.c **** 
+  68:Generated_Source\PSoC4/Therm.c **** /*******************************************************************************
+  69:Generated_Source\PSoC4/Therm.c **** * Function Name: Therm_GetTemperature
+  70:Generated_Source\PSoC4/Therm.c **** ********************************************************************************
+  71:Generated_Source\PSoC4/Therm.c **** *
+  72:Generated_Source\PSoC4/Therm.c **** * Summary:
+  73:Generated_Source\PSoC4/Therm.c **** *  The value of the thermistor resistance is passed to this function as a
+  74:Generated_Source\PSoC4/Therm.c **** *  parameter. The function returns the temperature, based on the resistance
+  75:Generated_Source\PSoC4/Therm.c **** *  value. The method used to calculate the temperature is dependent on whether
+  76:Generated_Source\PSoC4/Therm.c **** *  Equation or LUT was selected in the Customizer.
+  77:Generated_Source\PSoC4/Therm.c **** *
+  78:Generated_Source\PSoC4/Therm.c **** * Parameters:
+  79:Generated_Source\PSoC4/Therm.c **** *  resT: the resistance across the thermistor in Ohms.
+  80:Generated_Source\PSoC4/Therm.c **** *
+  81:Generated_Source\PSoC4/Therm.c **** * Return:
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 4
+
+
+  82:Generated_Source\PSoC4/Therm.c **** *  The return value is the temperature in 1/100ths of degrees C. For example,
+  83:Generated_Source\PSoC4/Therm.c **** *  the return value is 2345, when the actual temperature is 23.45 degrees C.
+  84:Generated_Source\PSoC4/Therm.c **** *
+  85:Generated_Source\PSoC4/Therm.c **** *******************************************************************************/
+  86:Generated_Source\PSoC4/Therm.c **** int16 Therm_GetTemperature(uint32 resT) 
+  87:Generated_Source\PSoC4/Therm.c **** {
+  91              		.loc 1 87 0
+  92              		.cfi_startproc
+  93              		@ args = 0, pretend = 0, frame = 0
+  94              		@ frame_needed = 0, uses_anonymous_args = 0
+  95              	.LVL10:
+  96 0000 30B5     		push	{r4, r5, lr}
+  97              		.cfi_def_cfa_offset 12
+  98              		.cfi_offset 4, -12
+  99              		.cfi_offset 5, -8
+ 100              		.cfi_offset 14, -4
+ 101              	.LVL11:
+  88:Generated_Source\PSoC4/Therm.c ****     int16 tempTR;
+  89:Generated_Source\PSoC4/Therm.c ****     static const uint32 CYCODE Therm_LUT[] = { 68237u, 66603u, 65013u, 63466u, 61959u, 60494u, 5906
+  90:Generated_Source\PSoC4/Therm.c ****  55008u, 53725u, 52477u, 51261u, 50076u, 48923u, 47799u, 46704u, 45638u, 44599u, 43586u, 42600u, 41
+  91:Generated_Source\PSoC4/Therm.c ****  38898u, 38030u, 37184u, 36360u, 35556u, 34772u, 34007u, 33262u, 32535u, 31826u, 31134u, 30459u, 29
+  92:Generated_Source\PSoC4/Therm.c ****  27921u, 27325u, 26743u, 26175u, 25620u, 25079u, 24551u, 24036u, 23532u, 23041u, 22561u, 22093u, 21
+  93:Generated_Source\PSoC4/Therm.c ****  20326u, 19910u, 19504u, 19107u, 18719u, 18340u, 17970u, 17608u, 17254u, 16909u, 16571u, 16241u, 15
+  94:Generated_Source\PSoC4/Therm.c ****  14995u, 14700u, 14412u, 14131u, 13856u, 13587u, 13324u, 13066u, 12815u, 12568u, 12328u, 12092u, 11
+  95:Generated_Source\PSoC4/Therm.c ****  11200u, 10989u, 10783u, 10581u, 10383u, 10189u, 10000u, 9815u, 9633u, 9456u, 9282u, 9111u, 8945u, 
+  96:Generated_Source\PSoC4/Therm.c ****  8312u, 8162u, 8015u, 7871u, 7730u, 7592u, 7457u, 7325u, 7195u, 7068u, 6943u, 6821u, 6702u, 6585u, 
+  97:Generated_Source\PSoC4/Therm.c ****  6139u, 6033u, 5929u, 5827u, 5728u, 5630u, 5534u, 5440u, 5348u, 5257u, 5169u, 5082u, 4997u, 4913u, 
+  98:Generated_Source\PSoC4/Therm.c ****  4595u, 4519u, 4444u, 4371u, 4300u, 4230u, 4161u, 4093u, 4027u, 3962u, 3898u, 3835u, 3773u, 3713u, 
+  99:Generated_Source\PSoC4/Therm.c ****  3482u, 3427u, 3373u, 3320u, 3268u, 3217u, 3167u, 3117u, 3069u, 3022u, 2975u, 2929u, 2884u, 2840u, 
+ 100:Generated_Source\PSoC4/Therm.c ****  2671u, 2630u, 2590u, 2551u, 2513u, 2475u, 2438u, 2402u, 2366u, 2331u, 2296u, 2263u, 2229u, 2196u, 
+ 101:Generated_Source\PSoC4/Therm.c ****  2071u, 2041u, 2011u, 1982u, 1954u, 1925u, 1898u, 1871u, 1844u, 1818u, 1792u, 1766u, 1741u, 1717u, 
+ 102:Generated_Source\PSoC4/Therm.c **** 
+ 103:Generated_Source\PSoC4/Therm.c **** 
+ 104:Generated_Source\PSoC4/Therm.c ****     #if (Therm_IMPLEMENTATION == Therm_EQUATION_METHOD)
+ 105:Generated_Source\PSoC4/Therm.c **** 
+ 106:Generated_Source\PSoC4/Therm.c ****         float32 stEqn;
+ 107:Generated_Source\PSoC4/Therm.c ****         float32 logrT;
+ 108:Generated_Source\PSoC4/Therm.c **** 
+ 109:Generated_Source\PSoC4/Therm.c ****         /* Calculate thermistor resistance from the voltages */
+ 110:Generated_Source\PSoC4/Therm.c ****         #if(!CY_PSOC3)
+ 111:Generated_Source\PSoC4/Therm.c ****             logrT = (float32)log((float64)resT);
+ 112:Generated_Source\PSoC4/Therm.c ****         #else
+ 113:Generated_Source\PSoC4/Therm.c ****             logrT = log((float32)resT);
+ 114:Generated_Source\PSoC4/Therm.c ****         #endif  /* (!CY_PSOC3) */
+ 115:Generated_Source\PSoC4/Therm.c **** 
+ 116:Generated_Source\PSoC4/Therm.c ****         /* Calculate temperature from the resistance of thermistor using Steinhart-Hart Equation */
+ 117:Generated_Source\PSoC4/Therm.c ****         #if(!CY_PSOC3)
+ 118:Generated_Source\PSoC4/Therm.c ****             stEqn = (float32)(Therm_THA + (Therm_THB * logrT) + 
+ 119:Generated_Source\PSoC4/Therm.c ****                              (Therm_THC * pow((float64)logrT, (float32)3)));
+ 120:Generated_Source\PSoC4/Therm.c ****         #else
+ 121:Generated_Source\PSoC4/Therm.c ****             stEqn = (float32)(Therm_THA + (Therm_THB * logrT) + 
+ 122:Generated_Source\PSoC4/Therm.c ****                              (Therm_THC * pow(logrT, (float32)3)));
+ 123:Generated_Source\PSoC4/Therm.c ****         #endif  /* (!CY_PSOC3) */
+ 124:Generated_Source\PSoC4/Therm.c **** 
+ 125:Generated_Source\PSoC4/Therm.c ****         tempTR = (int16)((float32)((((1.0 / stEqn) - Therm_K2C) * (float32)Therm_SCALE) + 0.5));
+ 126:Generated_Source\PSoC4/Therm.c **** 
+ 127:Generated_Source\PSoC4/Therm.c ****     #else /* Therm_IMPLEMENTATION == Therm_LUT_METHOD */
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 5
+
+
+ 128:Generated_Source\PSoC4/Therm.c **** 
+ 129:Generated_Source\PSoC4/Therm.c ****         uint16 mid;
+ 130:Generated_Source\PSoC4/Therm.c ****         uint16 first = 0u;
+ 131:Generated_Source\PSoC4/Therm.c ****         uint16 last = Therm_LUT_SIZE - 1u;
+ 102              		.loc 1 131 0
+ 103 0002 C821     		movs	r1, #200
+ 130:Generated_Source\PSoC4/Therm.c ****         uint16 last = Therm_LUT_SIZE - 1u;
+ 104              		.loc 1 130 0
+ 105 0004 0024     		movs	r4, #0
+ 132:Generated_Source\PSoC4/Therm.c **** 
+ 133:Generated_Source\PSoC4/Therm.c ****         /* Calculate temperature from the resistance of thermistor by using the LUT */
+ 134:Generated_Source\PSoC4/Therm.c ****         while (first < last)
+ 106              		.loc 1 134 0
+ 107 0006 12E0     		b	.L7
+ 108              	.LVL12:
+ 109              	.L11:
+ 135:Generated_Source\PSoC4/Therm.c ****         {
+ 136:Generated_Source\PSoC4/Therm.c ****             mid = (first + last) >> 1u;
+ 110              		.loc 1 136 0
+ 111 0008 6318     		adds	r3, r4, r1
+ 112 000a 5B10     		asrs	r3, r3, #1
+ 113 000c 9AB2     		uxth	r2, r3
+ 114              	.LVL13:
+ 137:Generated_Source\PSoC4/Therm.c **** 
+ 138:Generated_Source\PSoC4/Therm.c ****             if ((0u == mid) || ((Therm_LUT_SIZE - 1u) == mid) || (resT == Therm_LUT[mid]))
+ 115              		.loc 1 138 0
+ 116 000e 002A     		cmp	r2, #0
+ 117 0010 10D0     		beq	.L8
+ 118              		.loc 1 138 0 is_stmt 0 discriminator 1
+ 119 0012 C82A     		cmp	r2, #200
+ 120 0014 0ED0     		beq	.L8
+ 121              		.loc 1 138 0 discriminator 2
+ 122 0016 1B04     		lsls	r3, r3, #16
+ 123 0018 9B0B     		lsrs	r3, r3, #14
+ 124 001a 1A4D     		ldr	r5, .L14
+ 125 001c 5B59     		ldr	r3, [r3, r5]
+ 126 001e 8342     		cmp	r3, r0
+ 127 0020 08D0     		beq	.L8
+ 139:Generated_Source\PSoC4/Therm.c ****             {
+ 140:Generated_Source\PSoC4/Therm.c ****                 last = mid;
+ 141:Generated_Source\PSoC4/Therm.c ****                 break;
+ 142:Generated_Source\PSoC4/Therm.c ****             }
+ 143:Generated_Source\PSoC4/Therm.c ****             else if (Therm_LUT[mid] > resT)
+ 128              		.loc 1 143 0 is_stmt 1
+ 129 0022 02D9     		bls	.L9
+ 144:Generated_Source\PSoC4/Therm.c ****             {
+ 145:Generated_Source\PSoC4/Therm.c ****                 first = mid + 1u;
+ 130              		.loc 1 145 0
+ 131 0024 0132     		adds	r2, r2, #1
+ 132              	.LVL14:
+ 133 0026 94B2     		uxth	r4, r2
+ 134              	.LVL15:
+ 135 0028 01E0     		b	.L7
+ 136              	.LVL16:
+ 137              	.L9:
+ 146:Generated_Source\PSoC4/Therm.c ****             }
+ 147:Generated_Source\PSoC4/Therm.c ****             else /* (Therm_LUT[mid] < resT) */
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 6
+
+
+ 148:Generated_Source\PSoC4/Therm.c ****             {
+ 149:Generated_Source\PSoC4/Therm.c ****                 last = mid - 1u;
+ 138              		.loc 1 149 0
+ 139 002a 013A     		subs	r2, r2, #1
+ 140              	.LVL17:
+ 141 002c 91B2     		uxth	r1, r2
+ 142              	.LVL18:
+ 143              	.L7:
+ 134:Generated_Source\PSoC4/Therm.c ****         {
+ 144              		.loc 1 134 0
+ 145 002e 8C42     		cmp	r4, r1
+ 146 0030 EAD3     		bcc	.L11
+ 147 0032 0A00     		movs	r2, r1
+ 148              	.L8:
+ 149              	.LVL19:
+ 150:Generated_Source\PSoC4/Therm.c ****             }
+ 151:Generated_Source\PSoC4/Therm.c ****         }
+ 152:Generated_Source\PSoC4/Therm.c **** 
+ 153:Generated_Source\PSoC4/Therm.c ****         /* Calculation the closest entry in the LUT */
+ 154:Generated_Source\PSoC4/Therm.c ****         if ((Therm_LUT[last] > resT) && (last < (Therm_LUT_SIZE - 1u)) &&
+ 150              		.loc 1 154 0
+ 151 0034 9300     		lsls	r3, r2, #2
+ 152 0036 1349     		ldr	r1, .L14
+ 153 0038 5B58     		ldr	r3, [r3, r1]
+ 154 003a 9842     		cmp	r0, r3
+ 155 003c 0CD2     		bcs	.L12
+ 156              		.loc 1 154 0 is_stmt 0 discriminator 1
+ 157 003e C72A     		cmp	r2, #199
+ 158 0040 0AD8     		bhi	.L12
+ 155:Generated_Source\PSoC4/Therm.c ****            ((Therm_LUT[last] - resT) > (resT - Therm_LUT[last + 1u])))
+ 159              		.loc 1 155 0 is_stmt 1 discriminator 2
+ 160 0042 1C1A     		subs	r4, r3, r0
+ 161              	.LVL20:
+ 162 0044 511C     		adds	r1, r2, #1
+ 163 0046 8900     		lsls	r1, r1, #2
+ 164 0048 0E4D     		ldr	r5, .L14
+ 165 004a 4959     		ldr	r1, [r1, r5]
+ 166 004c 411A     		subs	r1, r0, r1
+ 154:Generated_Source\PSoC4/Therm.c ****            ((Therm_LUT[last] - resT) > (resT - Therm_LUT[last + 1u])))
+ 167              		.loc 1 154 0 discriminator 2
+ 168 004e 8C42     		cmp	r4, r1
+ 169 0050 02D9     		bls	.L12
+ 156:Generated_Source\PSoC4/Therm.c ****         {
+ 157:Generated_Source\PSoC4/Therm.c ****             last++;
+ 170              		.loc 1 157 0
+ 171 0052 0132     		adds	r2, r2, #1
+ 172              	.LVL21:
+ 173 0054 92B2     		uxth	r2, r2
+ 174              	.LVL22:
+ 175 0056 0DE0     		b	.L13
+ 176              	.L12:
+ 158:Generated_Source\PSoC4/Therm.c ****         }
+ 159:Generated_Source\PSoC4/Therm.c ****         else if ((Therm_LUT[last] < resT) && (last > 0u) &&
+ 177              		.loc 1 159 0
+ 178 0058 9842     		cmp	r0, r3
+ 179 005a 0BD9     		bls	.L13
+ 180              		.loc 1 159 0 is_stmt 0 discriminator 1
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 7
+
+
+ 181 005c 002A     		cmp	r2, #0
+ 182 005e 09D0     		beq	.L13
+ 160:Generated_Source\PSoC4/Therm.c ****                 ((Therm_LUT[last - 1u] - resT) < (resT - Therm_LUT[last])))
+ 183              		.loc 1 160 0 is_stmt 1 discriminator 2
+ 184 0060 511E     		subs	r1, r2, #1
+ 185 0062 8900     		lsls	r1, r1, #2
+ 186 0064 074C     		ldr	r4, .L14
+ 187 0066 0959     		ldr	r1, [r1, r4]
+ 188 0068 091A     		subs	r1, r1, r0
+ 189 006a C01A     		subs	r0, r0, r3
+ 190              	.LVL23:
+ 159:Generated_Source\PSoC4/Therm.c ****                 ((Therm_LUT[last - 1u] - resT) < (resT - Therm_LUT[last])))
+ 191              		.loc 1 159 0 discriminator 2
+ 192 006c 8142     		cmp	r1, r0
+ 193 006e 01D2     		bcs	.L13
+ 161:Generated_Source\PSoC4/Therm.c ****         {
+ 162:Generated_Source\PSoC4/Therm.c ****             last--;
+ 194              		.loc 1 162 0
+ 195 0070 013A     		subs	r2, r2, #1
+ 196              	.LVL24:
+ 197 0072 92B2     		uxth	r2, r2
+ 198              	.LVL25:
+ 199              	.L13:
+ 163:Generated_Source\PSoC4/Therm.c ****         }
+ 164:Generated_Source\PSoC4/Therm.c ****         else
+ 165:Generated_Source\PSoC4/Therm.c ****         {
+ 166:Generated_Source\PSoC4/Therm.c ****             /* Closest entry in the LUT already found */
+ 167:Generated_Source\PSoC4/Therm.c ****         }
+ 168:Generated_Source\PSoC4/Therm.c **** 
+ 169:Generated_Source\PSoC4/Therm.c ****         tempTR = Therm_MIN_TEMP + (int16)((uint16)(last * Therm_ACCURACY));
+ 200              		.loc 1 169 0
+ 201 0074 3220     		movs	r0, #50
+ 202 0076 4243     		muls	r2, r0
+ 203              	.LVL26:
+ 204 0078 90B2     		uxth	r0, r2
+ 205 007a 034B     		ldr	r3, .L14+4
+ 206 007c 9C46     		mov	ip, r3
+ 207 007e 6044     		add	r0, r0, ip
+ 208 0080 00B2     		sxth	r0, r0
+ 209              	.LVL27:
+ 170:Generated_Source\PSoC4/Therm.c **** 
+ 171:Generated_Source\PSoC4/Therm.c ****     #endif /* (Therm_IMPLEMENTATION == Therm_EQUATION_METHOD) */
+ 172:Generated_Source\PSoC4/Therm.c **** 
+ 173:Generated_Source\PSoC4/Therm.c ****     return (tempTR);
+ 174:Generated_Source\PSoC4/Therm.c **** }
+ 210              		.loc 1 174 0
+ 211              		@ sp needed
+ 212 0082 30BD     		pop	{r4, r5, pc}
+ 213              	.L15:
+ 214              		.align	2
+ 215              	.L14:
+ 216 0084 00000000 		.word	.LANCHOR0
+ 217 0088 30F8FFFF 		.word	-2000
+ 218              		.cfi_endproc
+ 219              	.LFE1:
+ 220              		.size	Therm_GetTemperature, .-Therm_GetTemperature
+ 221              		.section	.rodata
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 8
+
+
+ 222              		.align	2
+ 223              		.set	.LANCHOR0,. + 0
+ 224              		.type	Therm_LUT.4818, %object
+ 225              		.size	Therm_LUT.4818, 804
+ 226              	Therm_LUT.4818:
+ 227 0000 8D0A0100 		.word	68237
+ 228 0004 2B040100 		.word	66603
+ 229 0008 F5FD0000 		.word	65013
+ 230 000c EAF70000 		.word	63466
+ 231 0010 07F20000 		.word	61959
+ 232 0014 4EEC0000 		.word	60494
+ 233 0018 BAE60000 		.word	59066
+ 234 001c 4DE10000 		.word	57677
+ 235 0020 05DC0000 		.word	56325
+ 236 0024 E0D60000 		.word	55008
+ 237 0028 DDD10000 		.word	53725
+ 238 002c FDCC0000 		.word	52477
+ 239 0030 3DC80000 		.word	51261
+ 240 0034 9CC30000 		.word	50076
+ 241 0038 1BBF0000 		.word	48923
+ 242 003c B7BA0000 		.word	47799
+ 243 0040 70B60000 		.word	46704
+ 244 0044 46B20000 		.word	45638
+ 245 0048 37AE0000 		.word	44599
+ 246 004c 42AA0000 		.word	43586
+ 247 0050 68A60000 		.word	42600
+ 248 0054 A6A20000 		.word	41638
+ 249 0058 FD9E0000 		.word	40701
+ 250 005c 6C9B0000 		.word	39788
+ 251 0060 F2970000 		.word	38898
+ 252 0064 8E940000 		.word	38030
+ 253 0068 40910000 		.word	37184
+ 254 006c 088E0000 		.word	36360
+ 255 0070 E48A0000 		.word	35556
+ 256 0074 D4870000 		.word	34772
+ 257 0078 D7840000 		.word	34007
+ 258 007c EE810000 		.word	33262
+ 259 0080 177F0000 		.word	32535
+ 260 0084 527C0000 		.word	31826
+ 261 0088 9E790000 		.word	31134
+ 262 008c FB760000 		.word	30459
+ 263 0090 69740000 		.word	29801
+ 264 0094 E7710000 		.word	29159
+ 265 0098 746F0000 		.word	28532
+ 266 009c 116D0000 		.word	27921
+ 267 00a0 BD6A0000 		.word	27325
+ 268 00a4 77680000 		.word	26743
+ 269 00a8 3F660000 		.word	26175
+ 270 00ac 14640000 		.word	25620
+ 271 00b0 F7610000 		.word	25079
+ 272 00b4 E75F0000 		.word	24551
+ 273 00b8 E45D0000 		.word	24036
+ 274 00bc EC5B0000 		.word	23532
+ 275 00c0 015A0000 		.word	23041
+ 276 00c4 21580000 		.word	22561
+ 277 00c8 4D560000 		.word	22093
+ 278 00cc 83540000 		.word	21635
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 9
+
+
+ 279 00d0 C5520000 		.word	21189
+ 280 00d4 10510000 		.word	20752
+ 281 00d8 664F0000 		.word	20326
+ 282 00dc C64D0000 		.word	19910
+ 283 00e0 304C0000 		.word	19504
+ 284 00e4 A34A0000 		.word	19107
+ 285 00e8 1F490000 		.word	18719
+ 286 00ec A4470000 		.word	18340
+ 287 00f0 32460000 		.word	17970
+ 288 00f4 C8440000 		.word	17608
+ 289 00f8 66430000 		.word	17254
+ 290 00fc 0D420000 		.word	16909
+ 291 0100 BB400000 		.word	16571
+ 292 0104 713F0000 		.word	16241
+ 293 0108 2F3E0000 		.word	15919
+ 294 010c F43C0000 		.word	15604
+ 295 0110 C03B0000 		.word	15296
+ 296 0114 933A0000 		.word	14995
+ 297 0118 6C390000 		.word	14700
+ 298 011c 4C380000 		.word	14412
+ 299 0120 33370000 		.word	14131
+ 300 0124 20360000 		.word	13856
+ 301 0128 13350000 		.word	13587
+ 302 012c 0C340000 		.word	13324
+ 303 0130 0A330000 		.word	13066
+ 304 0134 0F320000 		.word	12815
+ 305 0138 18310000 		.word	12568
+ 306 013c 28300000 		.word	12328
+ 307 0140 3C2F0000 		.word	12092
+ 308 0144 562E0000 		.word	11862
+ 309 0148 752D0000 		.word	11637
+ 310 014c 982C0000 		.word	11416
+ 311 0150 C02B0000 		.word	11200
+ 312 0154 ED2A0000 		.word	10989
+ 313 0158 1F2A0000 		.word	10783
+ 314 015c 55290000 		.word	10581
+ 315 0160 8F280000 		.word	10383
+ 316 0164 CD270000 		.word	10189
+ 317 0168 10270000 		.word	10000
+ 318 016c 57260000 		.word	9815
+ 319 0170 A1250000 		.word	9633
+ 320 0174 F0240000 		.word	9456
+ 321 0178 42240000 		.word	9282
+ 322 017c 97230000 		.word	9111
+ 323 0180 F1220000 		.word	8945
+ 324 0184 4E220000 		.word	8782
+ 325 0188 AE210000 		.word	8622
+ 326 018c 11210000 		.word	8465
+ 327 0190 78200000 		.word	8312
+ 328 0194 E21F0000 		.word	8162
+ 329 0198 4F1F0000 		.word	8015
+ 330 019c BF1E0000 		.word	7871
+ 331 01a0 321E0000 		.word	7730
+ 332 01a4 A81D0000 		.word	7592
+ 333 01a8 211D0000 		.word	7457
+ 334 01ac 9D1C0000 		.word	7325
+ 335 01b0 1B1C0000 		.word	7195
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 10
+
+
+ 336 01b4 9C1B0000 		.word	7068
+ 337 01b8 1F1B0000 		.word	6943
+ 338 01bc A51A0000 		.word	6821
+ 339 01c0 2E1A0000 		.word	6702
+ 340 01c4 B9190000 		.word	6585
+ 341 01c8 46190000 		.word	6470
+ 342 01cc D5180000 		.word	6357
+ 343 01d0 67180000 		.word	6247
+ 344 01d4 FB170000 		.word	6139
+ 345 01d8 91170000 		.word	6033
+ 346 01dc 29170000 		.word	5929
+ 347 01e0 C3160000 		.word	5827
+ 348 01e4 60160000 		.word	5728
+ 349 01e8 FE150000 		.word	5630
+ 350 01ec 9E150000 		.word	5534
+ 351 01f0 40150000 		.word	5440
+ 352 01f4 E4140000 		.word	5348
+ 353 01f8 89140000 		.word	5257
+ 354 01fc 31140000 		.word	5169
+ 355 0200 DA130000 		.word	5082
+ 356 0204 85130000 		.word	4997
+ 357 0208 31130000 		.word	4913
+ 358 020c DF120000 		.word	4831
+ 359 0210 8F120000 		.word	4751
+ 360 0214 40120000 		.word	4672
+ 361 0218 F3110000 		.word	4595
+ 362 021c A7110000 		.word	4519
+ 363 0220 5C110000 		.word	4444
+ 364 0224 13110000 		.word	4371
+ 365 0228 CC100000 		.word	4300
+ 366 022c 86100000 		.word	4230
+ 367 0230 41100000 		.word	4161
+ 368 0234 FD0F0000 		.word	4093
+ 369 0238 BB0F0000 		.word	4027
+ 370 023c 7A0F0000 		.word	3962
+ 371 0240 3A0F0000 		.word	3898
+ 372 0244 FB0E0000 		.word	3835
+ 373 0248 BD0E0000 		.word	3773
+ 374 024c 810E0000 		.word	3713
+ 375 0250 460E0000 		.word	3654
+ 376 0254 0C0E0000 		.word	3596
+ 377 0258 D20D0000 		.word	3538
+ 378 025c 9A0D0000 		.word	3482
+ 379 0260 630D0000 		.word	3427
+ 380 0264 2D0D0000 		.word	3373
+ 381 0268 F80C0000 		.word	3320
+ 382 026c C40C0000 		.word	3268
+ 383 0270 910C0000 		.word	3217
+ 384 0274 5F0C0000 		.word	3167
+ 385 0278 2D0C0000 		.word	3117
+ 386 027c FD0B0000 		.word	3069
+ 387 0280 CE0B0000 		.word	3022
+ 388 0284 9F0B0000 		.word	2975
+ 389 0288 710B0000 		.word	2929
+ 390 028c 440B0000 		.word	2884
+ 391 0290 180B0000 		.word	2840
+ 392 0294 EC0A0000 		.word	2796
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 11
+
+
+ 393 0298 C20A0000 		.word	2754
+ 394 029c 980A0000 		.word	2712
+ 395 02a0 6F0A0000 		.word	2671
+ 396 02a4 460A0000 		.word	2630
+ 397 02a8 1E0A0000 		.word	2590
+ 398 02ac F7090000 		.word	2551
+ 399 02b0 D1090000 		.word	2513
+ 400 02b4 AB090000 		.word	2475
+ 401 02b8 86090000 		.word	2438
+ 402 02bc 62090000 		.word	2402
+ 403 02c0 3E090000 		.word	2366
+ 404 02c4 1B090000 		.word	2331
+ 405 02c8 F8080000 		.word	2296
+ 406 02cc D7080000 		.word	2263
+ 407 02d0 B5080000 		.word	2229
+ 408 02d4 94080000 		.word	2196
+ 409 02d8 74080000 		.word	2164
+ 410 02dc 55080000 		.word	2133
+ 411 02e0 35080000 		.word	2101
+ 412 02e4 17080000 		.word	2071
+ 413 02e8 F9070000 		.word	2041
+ 414 02ec DB070000 		.word	2011
+ 415 02f0 BE070000 		.word	1982
+ 416 02f4 A2070000 		.word	1954
+ 417 02f8 85070000 		.word	1925
+ 418 02fc 6A070000 		.word	1898
+ 419 0300 4F070000 		.word	1871
+ 420 0304 34070000 		.word	1844
+ 421 0308 1A070000 		.word	1818
+ 422 030c 00070000 		.word	1792
+ 423 0310 E6060000 		.word	1766
+ 424 0314 CD060000 		.word	1741
+ 425 0318 B5060000 		.word	1717
+ 426 031c 9D060000 		.word	1693
+ 427 0320 85060000 		.word	1669
+ 428              		.text
+ 429              	.Letext0:
+ 430              		.file 2 "Generated_Source\\PSoC4\\cytypes.h"
+ 431              		.section	.debug_info,"",%progbits
+ 432              	.Ldebug_info0:
+ 433 0000 9F010000 		.4byte	0x19f
+ 434 0004 0400     		.2byte	0x4
+ 435 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 436 000a 04       		.byte	0x4
+ 437 000b 01       		.uleb128 0x1
+ 438 000c 38010000 		.4byte	.LASF28
+ 439 0010 0C       		.byte	0xc
+ 440 0011 AA000000 		.4byte	.LASF29
+ 441 0015 ED000000 		.4byte	.LASF30
+ 442 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 443 001d 00000000 		.4byte	0
+ 444 0021 00000000 		.4byte	.Ldebug_line0
+ 445 0025 02       		.uleb128 0x2
+ 446 0026 01       		.byte	0x1
+ 447 0027 06       		.byte	0x6
+ 448 0028 06020000 		.4byte	.LASF0
+ 449 002c 02       		.uleb128 0x2
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 12
+
+
+ 450 002d 01       		.byte	0x1
+ 451 002e 08       		.byte	0x8
+ 452 002f 5D000000 		.4byte	.LASF1
+ 453 0033 02       		.uleb128 0x2
+ 454 0034 02       		.byte	0x2
+ 455 0035 05       		.byte	0x5
+ 456 0036 E2010000 		.4byte	.LASF2
+ 457 003a 02       		.uleb128 0x2
+ 458 003b 02       		.byte	0x2
+ 459 003c 07       		.byte	0x7
+ 460 003d 0B000000 		.4byte	.LASF3
+ 461 0041 02       		.uleb128 0x2
+ 462 0042 04       		.byte	0x4
+ 463 0043 05       		.byte	0x5
+ 464 0044 EC010000 		.4byte	.LASF4
+ 465 0048 02       		.uleb128 0x2
+ 466 0049 04       		.byte	0x4
+ 467 004a 07       		.byte	0x7
+ 468 004b 71000000 		.4byte	.LASF5
+ 469 004f 02       		.uleb128 0x2
+ 470 0050 08       		.byte	0x8
+ 471 0051 05       		.byte	0x5
+ 472 0052 CF010000 		.4byte	.LASF6
+ 473 0056 02       		.uleb128 0x2
+ 474 0057 08       		.byte	0x8
+ 475 0058 07       		.byte	0x7
+ 476 0059 D6000000 		.4byte	.LASF7
+ 477 005d 03       		.uleb128 0x3
+ 478 005e 04       		.byte	0x4
+ 479 005f 05       		.byte	0x5
+ 480 0060 696E7400 		.ascii	"int\000"
+ 481 0064 02       		.uleb128 0x2
+ 482 0065 04       		.byte	0x4
+ 483 0066 07       		.byte	0x7
+ 484 0067 C9000000 		.4byte	.LASF8
+ 485 006b 04       		.uleb128 0x4
+ 486 006c 9C000000 		.4byte	.LASF9
+ 487 0070 02       		.byte	0x2
+ 488 0071 FD01     		.2byte	0x1fd
+ 489 0073 3A000000 		.4byte	0x3a
+ 490 0077 04       		.uleb128 0x4
+ 491 0078 A3000000 		.4byte	.LASF10
+ 492 007c 02       		.byte	0x2
+ 493 007d FE01     		.2byte	0x1fe
+ 494 007f 48000000 		.4byte	0x48
+ 495 0083 04       		.uleb128 0x4
+ 496 0084 6B000000 		.4byte	.LASF11
+ 497 0088 02       		.byte	0x2
+ 498 0089 0002     		.2byte	0x200
+ 499 008b 33000000 		.4byte	0x33
+ 500 008f 04       		.uleb128 0x4
+ 501 0090 88000000 		.4byte	.LASF12
+ 502 0094 02       		.byte	0x2
+ 503 0095 0102     		.2byte	0x201
+ 504 0097 41000000 		.4byte	0x41
+ 505 009b 02       		.uleb128 0x2
+ 506 009c 04       		.byte	0x4
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 13
+
+
+ 507 009d 04       		.byte	0x4
+ 508 009e 57000000 		.4byte	.LASF13
+ 509 00a2 02       		.uleb128 0x2
+ 510 00a3 08       		.byte	0x8
+ 511 00a4 04       		.byte	0x4
+ 512 00a5 95000000 		.4byte	.LASF14
+ 513 00a9 02       		.uleb128 0x2
+ 514 00aa 01       		.byte	0x1
+ 515 00ab 08       		.byte	0x8
+ 516 00ac DD010000 		.4byte	.LASF15
+ 517 00b0 02       		.uleb128 0x2
+ 518 00b1 08       		.byte	0x8
+ 519 00b2 04       		.byte	0x4
+ 520 00b3 FA010000 		.4byte	.LASF16
+ 521 00b7 02       		.uleb128 0x2
+ 522 00b8 04       		.byte	0x4
+ 523 00b9 07       		.byte	0x7
+ 524 00ba C6010000 		.4byte	.LASF17
+ 525 00be 05       		.uleb128 0x5
+ 526 00bf 39000000 		.4byte	.LASF22
+ 527 00c3 01       		.byte	0x1
+ 528 00c4 2A       		.byte	0x2a
+ 529 00c5 77000000 		.4byte	0x77
+ 530 00c9 00000000 		.4byte	.LFB0
+ 531 00cd 2C000000 		.4byte	.LFE0-.LFB0
+ 532 00d1 01       		.uleb128 0x1
+ 533 00d2 9C       		.byte	0x9c
+ 534 00d3 14010000 		.4byte	0x114
+ 535 00d7 06       		.uleb128 0x6
+ 536 00d8 00000000 		.4byte	.LASF18
+ 537 00dc 01       		.byte	0x1
+ 538 00dd 2A       		.byte	0x2a
+ 539 00de 83000000 		.4byte	0x83
+ 540 00e2 00000000 		.4byte	.LLST0
+ 541 00e6 06       		.uleb128 0x6
+ 542 00e7 2C010000 		.4byte	.LASF19
+ 543 00eb 01       		.byte	0x1
+ 544 00ec 2A       		.byte	0x2a
+ 545 00ed 83000000 		.4byte	0x83
+ 546 00f1 3A000000 		.4byte	.LLST1
+ 547 00f5 07       		.uleb128 0x7
+ 548 00f6 F5010000 		.4byte	.LASF20
+ 549 00fa 01       		.byte	0x1
+ 550 00fb 2D       		.byte	0x2d
+ 551 00fc 8F000000 		.4byte	0x8f
+ 552 0100 5B000000 		.4byte	.LLST2
+ 553 0104 07       		.uleb128 0x7
+ 554 0105 83000000 		.4byte	.LASF21
+ 555 0109 01       		.byte	0x1
+ 556 010a 2E       		.byte	0x2e
+ 557 010b 83000000 		.4byte	0x83
+ 558 010f 84000000 		.4byte	.LLST3
+ 559 0113 00       		.byte	0
+ 560 0114 08       		.uleb128 0x8
+ 561 0115 24000000 		.4byte	.LASF23
+ 562 0119 01       		.byte	0x1
+ 563 011a 56       		.byte	0x56
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 14
+
+
+ 564 011b 83000000 		.4byte	0x83
+ 565 011f 00000000 		.4byte	.LFB1
+ 566 0123 8C000000 		.4byte	.LFE1-.LFB1
+ 567 0127 01       		.uleb128 0x1
+ 568 0128 9C       		.byte	0x9c
+ 569 0129 88010000 		.4byte	0x188
+ 570 012d 06       		.uleb128 0x6
+ 571 012e F5010000 		.4byte	.LASF20
+ 572 0132 01       		.byte	0x1
+ 573 0133 56       		.byte	0x56
+ 574 0134 77000000 		.4byte	0x77
+ 575 0138 A2000000 		.4byte	.LLST4
+ 576 013c 09       		.uleb128 0x9
+ 577 013d 8E000000 		.4byte	.LASF24
+ 578 0141 01       		.byte	0x1
+ 579 0142 58       		.byte	0x58
+ 580 0143 83000000 		.4byte	0x83
+ 581 0147 01       		.uleb128 0x1
+ 582 0148 50       		.byte	0x50
+ 583 0149 09       		.uleb128 0x9
+ 584 014a 4D000000 		.4byte	.LASF25
+ 585 014e 01       		.byte	0x1
+ 586 014f 59       		.byte	0x59
+ 587 0150 9D010000 		.4byte	0x19d
+ 588 0154 05       		.uleb128 0x5
+ 589 0155 03       		.byte	0x3
+ 590 0156 00000000 		.4byte	Therm_LUT.4818
+ 591 015a 0A       		.uleb128 0xa
+ 592 015b 6D696400 		.ascii	"mid\000"
+ 593 015f 01       		.byte	0x1
+ 594 0160 81       		.byte	0x81
+ 595 0161 6B000000 		.4byte	0x6b
+ 596 0165 C3000000 		.4byte	.LLST5
+ 597 0169 07       		.uleb128 0x7
+ 598 016a 1E000000 		.4byte	.LASF26
+ 599 016e 01       		.byte	0x1
+ 600 016f 82       		.byte	0x82
+ 601 0170 6B000000 		.4byte	0x6b
+ 602 0174 FB000000 		.4byte	.LLST6
+ 603 0178 07       		.uleb128 0x7
+ 604 0179 12020000 		.4byte	.LASF27
+ 605 017d 01       		.byte	0x1
+ 606 017e 83       		.byte	0x83
+ 607 017f 6B000000 		.4byte	0x6b
+ 608 0183 1A010000 		.4byte	.LLST7
+ 609 0187 00       		.byte	0
+ 610 0188 0B       		.uleb128 0xb
+ 611 0189 98010000 		.4byte	0x198
+ 612 018d 98010000 		.4byte	0x198
+ 613 0191 0C       		.uleb128 0xc
+ 614 0192 B7000000 		.4byte	0xb7
+ 615 0196 C8       		.byte	0xc8
+ 616 0197 00       		.byte	0
+ 617 0198 0D       		.uleb128 0xd
+ 618 0199 77000000 		.4byte	0x77
+ 619 019d 0D       		.uleb128 0xd
+ 620 019e 88010000 		.4byte	0x188
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 15
+
+
+ 621 01a2 00       		.byte	0
+ 622              		.section	.debug_abbrev,"",%progbits
+ 623              	.Ldebug_abbrev0:
+ 624 0000 01       		.uleb128 0x1
+ 625 0001 11       		.uleb128 0x11
+ 626 0002 01       		.byte	0x1
+ 627 0003 25       		.uleb128 0x25
+ 628 0004 0E       		.uleb128 0xe
+ 629 0005 13       		.uleb128 0x13
+ 630 0006 0B       		.uleb128 0xb
+ 631 0007 03       		.uleb128 0x3
+ 632 0008 0E       		.uleb128 0xe
+ 633 0009 1B       		.uleb128 0x1b
+ 634 000a 0E       		.uleb128 0xe
+ 635 000b 55       		.uleb128 0x55
+ 636 000c 17       		.uleb128 0x17
+ 637 000d 11       		.uleb128 0x11
+ 638 000e 01       		.uleb128 0x1
+ 639 000f 10       		.uleb128 0x10
+ 640 0010 17       		.uleb128 0x17
+ 641 0011 00       		.byte	0
+ 642 0012 00       		.byte	0
+ 643 0013 02       		.uleb128 0x2
+ 644 0014 24       		.uleb128 0x24
+ 645 0015 00       		.byte	0
+ 646 0016 0B       		.uleb128 0xb
+ 647 0017 0B       		.uleb128 0xb
+ 648 0018 3E       		.uleb128 0x3e
+ 649 0019 0B       		.uleb128 0xb
+ 650 001a 03       		.uleb128 0x3
+ 651 001b 0E       		.uleb128 0xe
+ 652 001c 00       		.byte	0
+ 653 001d 00       		.byte	0
+ 654 001e 03       		.uleb128 0x3
+ 655 001f 24       		.uleb128 0x24
+ 656 0020 00       		.byte	0
+ 657 0021 0B       		.uleb128 0xb
+ 658 0022 0B       		.uleb128 0xb
+ 659 0023 3E       		.uleb128 0x3e
+ 660 0024 0B       		.uleb128 0xb
+ 661 0025 03       		.uleb128 0x3
+ 662 0026 08       		.uleb128 0x8
+ 663 0027 00       		.byte	0
+ 664 0028 00       		.byte	0
+ 665 0029 04       		.uleb128 0x4
+ 666 002a 16       		.uleb128 0x16
+ 667 002b 00       		.byte	0
+ 668 002c 03       		.uleb128 0x3
+ 669 002d 0E       		.uleb128 0xe
+ 670 002e 3A       		.uleb128 0x3a
+ 671 002f 0B       		.uleb128 0xb
+ 672 0030 3B       		.uleb128 0x3b
+ 673 0031 05       		.uleb128 0x5
+ 674 0032 49       		.uleb128 0x49
+ 675 0033 13       		.uleb128 0x13
+ 676 0034 00       		.byte	0
+ 677 0035 00       		.byte	0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 16
+
+
+ 678 0036 05       		.uleb128 0x5
+ 679 0037 2E       		.uleb128 0x2e
+ 680 0038 01       		.byte	0x1
+ 681 0039 3F       		.uleb128 0x3f
+ 682 003a 19       		.uleb128 0x19
+ 683 003b 03       		.uleb128 0x3
+ 684 003c 0E       		.uleb128 0xe
+ 685 003d 3A       		.uleb128 0x3a
+ 686 003e 0B       		.uleb128 0xb
+ 687 003f 3B       		.uleb128 0x3b
+ 688 0040 0B       		.uleb128 0xb
+ 689 0041 27       		.uleb128 0x27
+ 690 0042 19       		.uleb128 0x19
+ 691 0043 49       		.uleb128 0x49
+ 692 0044 13       		.uleb128 0x13
+ 693 0045 11       		.uleb128 0x11
+ 694 0046 01       		.uleb128 0x1
+ 695 0047 12       		.uleb128 0x12
+ 696 0048 06       		.uleb128 0x6
+ 697 0049 40       		.uleb128 0x40
+ 698 004a 18       		.uleb128 0x18
+ 699 004b 9642     		.uleb128 0x2116
+ 700 004d 19       		.uleb128 0x19
+ 701 004e 01       		.uleb128 0x1
+ 702 004f 13       		.uleb128 0x13
+ 703 0050 00       		.byte	0
+ 704 0051 00       		.byte	0
+ 705 0052 06       		.uleb128 0x6
+ 706 0053 05       		.uleb128 0x5
+ 707 0054 00       		.byte	0
+ 708 0055 03       		.uleb128 0x3
+ 709 0056 0E       		.uleb128 0xe
+ 710 0057 3A       		.uleb128 0x3a
+ 711 0058 0B       		.uleb128 0xb
+ 712 0059 3B       		.uleb128 0x3b
+ 713 005a 0B       		.uleb128 0xb
+ 714 005b 49       		.uleb128 0x49
+ 715 005c 13       		.uleb128 0x13
+ 716 005d 02       		.uleb128 0x2
+ 717 005e 17       		.uleb128 0x17
+ 718 005f 00       		.byte	0
+ 719 0060 00       		.byte	0
+ 720 0061 07       		.uleb128 0x7
+ 721 0062 34       		.uleb128 0x34
+ 722 0063 00       		.byte	0
+ 723 0064 03       		.uleb128 0x3
+ 724 0065 0E       		.uleb128 0xe
+ 725 0066 3A       		.uleb128 0x3a
+ 726 0067 0B       		.uleb128 0xb
+ 727 0068 3B       		.uleb128 0x3b
+ 728 0069 0B       		.uleb128 0xb
+ 729 006a 49       		.uleb128 0x49
+ 730 006b 13       		.uleb128 0x13
+ 731 006c 02       		.uleb128 0x2
+ 732 006d 17       		.uleb128 0x17
+ 733 006e 00       		.byte	0
+ 734 006f 00       		.byte	0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 17
+
+
+ 735 0070 08       		.uleb128 0x8
+ 736 0071 2E       		.uleb128 0x2e
+ 737 0072 01       		.byte	0x1
+ 738 0073 3F       		.uleb128 0x3f
+ 739 0074 19       		.uleb128 0x19
+ 740 0075 03       		.uleb128 0x3
+ 741 0076 0E       		.uleb128 0xe
+ 742 0077 3A       		.uleb128 0x3a
+ 743 0078 0B       		.uleb128 0xb
+ 744 0079 3B       		.uleb128 0x3b
+ 745 007a 0B       		.uleb128 0xb
+ 746 007b 27       		.uleb128 0x27
+ 747 007c 19       		.uleb128 0x19
+ 748 007d 49       		.uleb128 0x49
+ 749 007e 13       		.uleb128 0x13
+ 750 007f 11       		.uleb128 0x11
+ 751 0080 01       		.uleb128 0x1
+ 752 0081 12       		.uleb128 0x12
+ 753 0082 06       		.uleb128 0x6
+ 754 0083 40       		.uleb128 0x40
+ 755 0084 18       		.uleb128 0x18
+ 756 0085 9742     		.uleb128 0x2117
+ 757 0087 19       		.uleb128 0x19
+ 758 0088 01       		.uleb128 0x1
+ 759 0089 13       		.uleb128 0x13
+ 760 008a 00       		.byte	0
+ 761 008b 00       		.byte	0
+ 762 008c 09       		.uleb128 0x9
+ 763 008d 34       		.uleb128 0x34
+ 764 008e 00       		.byte	0
+ 765 008f 03       		.uleb128 0x3
+ 766 0090 0E       		.uleb128 0xe
+ 767 0091 3A       		.uleb128 0x3a
+ 768 0092 0B       		.uleb128 0xb
+ 769 0093 3B       		.uleb128 0x3b
+ 770 0094 0B       		.uleb128 0xb
+ 771 0095 49       		.uleb128 0x49
+ 772 0096 13       		.uleb128 0x13
+ 773 0097 02       		.uleb128 0x2
+ 774 0098 18       		.uleb128 0x18
+ 775 0099 00       		.byte	0
+ 776 009a 00       		.byte	0
+ 777 009b 0A       		.uleb128 0xa
+ 778 009c 34       		.uleb128 0x34
+ 779 009d 00       		.byte	0
+ 780 009e 03       		.uleb128 0x3
+ 781 009f 08       		.uleb128 0x8
+ 782 00a0 3A       		.uleb128 0x3a
+ 783 00a1 0B       		.uleb128 0xb
+ 784 00a2 3B       		.uleb128 0x3b
+ 785 00a3 0B       		.uleb128 0xb
+ 786 00a4 49       		.uleb128 0x49
+ 787 00a5 13       		.uleb128 0x13
+ 788 00a6 02       		.uleb128 0x2
+ 789 00a7 17       		.uleb128 0x17
+ 790 00a8 00       		.byte	0
+ 791 00a9 00       		.byte	0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 18
+
+
+ 792 00aa 0B       		.uleb128 0xb
+ 793 00ab 01       		.uleb128 0x1
+ 794 00ac 01       		.byte	0x1
+ 795 00ad 49       		.uleb128 0x49
+ 796 00ae 13       		.uleb128 0x13
+ 797 00af 01       		.uleb128 0x1
+ 798 00b0 13       		.uleb128 0x13
+ 799 00b1 00       		.byte	0
+ 800 00b2 00       		.byte	0
+ 801 00b3 0C       		.uleb128 0xc
+ 802 00b4 21       		.uleb128 0x21
+ 803 00b5 00       		.byte	0
+ 804 00b6 49       		.uleb128 0x49
+ 805 00b7 13       		.uleb128 0x13
+ 806 00b8 2F       		.uleb128 0x2f
+ 807 00b9 0B       		.uleb128 0xb
+ 808 00ba 00       		.byte	0
+ 809 00bb 00       		.byte	0
+ 810 00bc 0D       		.uleb128 0xd
+ 811 00bd 26       		.uleb128 0x26
+ 812 00be 00       		.byte	0
+ 813 00bf 49       		.uleb128 0x49
+ 814 00c0 13       		.uleb128 0x13
+ 815 00c1 00       		.byte	0
+ 816 00c2 00       		.byte	0
+ 817 00c3 00       		.byte	0
+ 818              		.section	.debug_loc,"",%progbits
+ 819              	.Ldebug_loc0:
+ 820              	.LLST0:
+ 821 0000 00000000 		.4byte	.LVL0
+ 822 0004 0E000000 		.4byte	.LVL2
+ 823 0008 0100     		.2byte	0x1
+ 824 000a 50       		.byte	0x50
+ 825 000b 0E000000 		.4byte	.LVL2
+ 826 000f 18000000 		.4byte	.LVL6
+ 827 0013 0400     		.2byte	0x4
+ 828 0015 F3       		.byte	0xf3
+ 829 0016 01       		.uleb128 0x1
+ 830 0017 50       		.byte	0x50
+ 831 0018 9F       		.byte	0x9f
+ 832 0019 18000000 		.4byte	.LVL6
+ 833 001d 1C000000 		.4byte	.LVL7
+ 834 0021 0100     		.2byte	0x1
+ 835 0023 50       		.byte	0x50
+ 836 0024 1C000000 		.4byte	.LVL7
+ 837 0028 2C000000 		.4byte	.LFE0
+ 838 002c 0400     		.2byte	0x4
+ 839 002e F3       		.byte	0xf3
+ 840 002f 01       		.uleb128 0x1
+ 841 0030 50       		.byte	0x50
+ 842 0031 9F       		.byte	0x9f
+ 843 0032 00000000 		.4byte	0
+ 844 0036 00000000 		.4byte	0
+ 845              	.LLST1:
+ 846 003a 00000000 		.4byte	.LVL0
+ 847 003e 08000000 		.4byte	.LVL1
+ 848 0042 0100     		.2byte	0x1
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 19
+
+
+ 849 0044 51       		.byte	0x51
+ 850 0045 08000000 		.4byte	.LVL1
+ 851 0049 2C000000 		.4byte	.LFE0
+ 852 004d 0400     		.2byte	0x4
+ 853 004f F3       		.byte	0xf3
+ 854 0050 01       		.uleb128 0x1
+ 855 0051 51       		.byte	0x51
+ 856 0052 9F       		.byte	0x9f
+ 857 0053 00000000 		.4byte	0
+ 858 0057 00000000 		.4byte	0
+ 859              	.LLST2:
+ 860 005b 08000000 		.4byte	.LVL1
+ 861 005f 1E000000 		.4byte	.LVL8
+ 862 0063 0100     		.2byte	0x1
+ 863 0065 51       		.byte	0x51
+ 864 0066 1E000000 		.4byte	.LVL8
+ 865 006a 23000000 		.4byte	.LVL9-1
+ 866 006e 0100     		.2byte	0x1
+ 867 0070 50       		.byte	0x50
+ 868 0071 24000000 		.4byte	.LVL9
+ 869 0075 2C000000 		.4byte	.LFE0
+ 870 0079 0100     		.2byte	0x1
+ 871 007b 50       		.byte	0x50
+ 872 007c 00000000 		.4byte	0
+ 873 0080 00000000 		.4byte	0
+ 874              	.LLST3:
+ 875 0084 10000000 		.4byte	.LVL3
+ 876 0088 18000000 		.4byte	.LVL6
+ 877 008c 0100     		.2byte	0x1
+ 878 008e 50       		.byte	0x50
+ 879 008f 1C000000 		.4byte	.LVL7
+ 880 0093 1E000000 		.4byte	.LVL8
+ 881 0097 0100     		.2byte	0x1
+ 882 0099 50       		.byte	0x50
+ 883 009a 00000000 		.4byte	0
+ 884 009e 00000000 		.4byte	0
+ 885              	.LLST4:
+ 886 00a2 00000000 		.4byte	.LVL10
+ 887 00a6 6C000000 		.4byte	.LVL23
+ 888 00aa 0100     		.2byte	0x1
+ 889 00ac 50       		.byte	0x50
+ 890 00ad 6C000000 		.4byte	.LVL23
+ 891 00b1 8C000000 		.4byte	.LFE1
+ 892 00b5 0400     		.2byte	0x4
+ 893 00b7 F3       		.byte	0xf3
+ 894 00b8 01       		.uleb128 0x1
+ 895 00b9 50       		.byte	0x50
+ 896 00ba 9F       		.byte	0x9f
+ 897 00bb 00000000 		.4byte	0
+ 898 00bf 00000000 		.4byte	0
+ 899              	.LLST5:
+ 900 00c3 0E000000 		.4byte	.LVL13
+ 901 00c7 26000000 		.4byte	.LVL14
+ 902 00cb 0100     		.2byte	0x1
+ 903 00cd 52       		.byte	0x52
+ 904 00ce 26000000 		.4byte	.LVL14
+ 905 00d2 2A000000 		.4byte	.LVL16
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 20
+
+
+ 906 00d6 0300     		.2byte	0x3
+ 907 00d8 72       		.byte	0x72
+ 908 00d9 7F       		.sleb128 -1
+ 909 00da 9F       		.byte	0x9f
+ 910 00db 2A000000 		.4byte	.LVL16
+ 911 00df 2C000000 		.4byte	.LVL17
+ 912 00e3 0100     		.2byte	0x1
+ 913 00e5 52       		.byte	0x52
+ 914 00e6 2C000000 		.4byte	.LVL17
+ 915 00ea 2E000000 		.4byte	.LVL18
+ 916 00ee 0300     		.2byte	0x3
+ 917 00f0 72       		.byte	0x72
+ 918 00f1 01       		.sleb128 1
+ 919 00f2 9F       		.byte	0x9f
+ 920 00f3 00000000 		.4byte	0
+ 921 00f7 00000000 		.4byte	0
+ 922              	.LLST6:
+ 923 00fb 02000000 		.4byte	.LVL11
+ 924 00ff 08000000 		.4byte	.LVL12
+ 925 0103 0200     		.2byte	0x2
+ 926 0105 30       		.byte	0x30
+ 927 0106 9F       		.byte	0x9f
+ 928 0107 08000000 		.4byte	.LVL12
+ 929 010b 44000000 		.4byte	.LVL20
+ 930 010f 0100     		.2byte	0x1
+ 931 0111 54       		.byte	0x54
+ 932 0112 00000000 		.4byte	0
+ 933 0116 00000000 		.4byte	0
+ 934              	.LLST7:
+ 935 011a 02000000 		.4byte	.LVL11
+ 936 011e 08000000 		.4byte	.LVL12
+ 937 0122 0300     		.2byte	0x3
+ 938 0124 08       		.byte	0x8
+ 939 0125 C8       		.byte	0xc8
+ 940 0126 9F       		.byte	0x9f
+ 941 0127 08000000 		.4byte	.LVL12
+ 942 012b 34000000 		.4byte	.LVL19
+ 943 012f 0100     		.2byte	0x1
+ 944 0131 51       		.byte	0x51
+ 945 0132 34000000 		.4byte	.LVL19
+ 946 0136 54000000 		.4byte	.LVL21
+ 947 013a 0100     		.2byte	0x1
+ 948 013c 52       		.byte	0x52
+ 949 013d 56000000 		.4byte	.LVL22
+ 950 0141 72000000 		.4byte	.LVL24
+ 951 0145 0100     		.2byte	0x1
+ 952 0147 52       		.byte	0x52
+ 953 0148 74000000 		.4byte	.LVL25
+ 954 014c 78000000 		.4byte	.LVL26
+ 955 0150 0100     		.2byte	0x1
+ 956 0152 52       		.byte	0x52
+ 957 0153 00000000 		.4byte	0
+ 958 0157 00000000 		.4byte	0
+ 959              		.section	.debug_aranges,"",%progbits
+ 960 0000 24000000 		.4byte	0x24
+ 961 0004 0200     		.2byte	0x2
+ 962 0006 00000000 		.4byte	.Ldebug_info0
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 21
+
+
+ 963 000a 04       		.byte	0x4
+ 964 000b 00       		.byte	0
+ 965 000c 0000     		.2byte	0
+ 966 000e 0000     		.2byte	0
+ 967 0010 00000000 		.4byte	.LFB0
+ 968 0014 2C000000 		.4byte	.LFE0-.LFB0
+ 969 0018 00000000 		.4byte	.LFB1
+ 970 001c 8C000000 		.4byte	.LFE1-.LFB1
+ 971 0020 00000000 		.4byte	0
+ 972 0024 00000000 		.4byte	0
+ 973              		.section	.debug_ranges,"",%progbits
+ 974              	.Ldebug_ranges0:
+ 975 0000 00000000 		.4byte	.LFB0
+ 976 0004 2C000000 		.4byte	.LFE0
+ 977 0008 00000000 		.4byte	.LFB1
+ 978 000c 8C000000 		.4byte	.LFE1
+ 979 0010 00000000 		.4byte	0
+ 980 0014 00000000 		.4byte	0
+ 981              		.section	.debug_line,"",%progbits
+ 982              	.Ldebug_line0:
+ 983 0000 B3000000 		.section	.debug_str,"MS",%progbits,1
+ 983      02004200 
+ 983      00000201 
+ 983      FB0E0D00 
+ 983      01010101 
+ 984              	.LASF18:
+ 985 0000 76526566 		.ascii	"vReference\000"
+ 985      6572656E 
+ 985      636500
+ 986              	.LASF3:
+ 987 000b 73686F72 		.ascii	"short unsigned int\000"
+ 987      7420756E 
+ 987      7369676E 
+ 987      65642069 
+ 987      6E7400
+ 988              	.LASF26:
+ 989 001e 66697273 		.ascii	"first\000"
+ 989      7400
+ 990              	.LASF23:
+ 991 0024 54686572 		.ascii	"Therm_GetTemperature\000"
+ 991      6D5F4765 
+ 991      7454656D 
+ 991      70657261 
+ 991      74757265 
+ 992              	.LASF22:
+ 993 0039 54686572 		.ascii	"Therm_GetResistance\000"
+ 993      6D5F4765 
+ 993      74526573 
+ 993      69737461 
+ 993      6E636500 
+ 994              	.LASF25:
+ 995 004d 54686572 		.ascii	"Therm_LUT\000"
+ 995      6D5F4C55 
+ 995      5400
+ 996              	.LASF13:
+ 997 0057 666C6F61 		.ascii	"float\000"
+ 997      7400
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 22
+
+
+ 998              	.LASF1:
+ 999 005d 756E7369 		.ascii	"unsigned char\000"
+ 999      676E6564 
+ 999      20636861 
+ 999      7200
+ 1000              	.LASF11:
+ 1001 006b 696E7431 		.ascii	"int16\000"
+ 1001      3600
+ 1002              	.LASF5:
+ 1003 0071 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1003      20756E73 
+ 1003      69676E65 
+ 1003      6420696E 
+ 1003      7400
+ 1004              	.LASF21:
+ 1005 0083 74656D70 		.ascii	"temp\000"
+ 1005      00
+ 1006              	.LASF12:
+ 1007 0088 696E7433 		.ascii	"int32\000"
+ 1007      3200
+ 1008              	.LASF24:
+ 1009 008e 74656D70 		.ascii	"tempTR\000"
+ 1009      545200
+ 1010              	.LASF14:
+ 1011 0095 646F7562 		.ascii	"double\000"
+ 1011      6C6500
+ 1012              	.LASF9:
+ 1013 009c 75696E74 		.ascii	"uint16\000"
+ 1013      313600
+ 1014              	.LASF10:
+ 1015 00a3 75696E74 		.ascii	"uint32\000"
+ 1015      333200
+ 1016              	.LASF29:
+ 1017 00aa 47656E65 		.ascii	"Generated_Source\\PSoC4\\Therm.c\000"
+ 1017      72617465 
+ 1017      645F536F 
+ 1017      75726365 
+ 1017      5C50536F 
+ 1018              	.LASF8:
+ 1019 00c9 756E7369 		.ascii	"unsigned int\000"
+ 1019      676E6564 
+ 1019      20696E74 
+ 1019      00
+ 1020              	.LASF7:
+ 1021 00d6 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1021      206C6F6E 
+ 1021      6720756E 
+ 1021      7369676E 
+ 1021      65642069 
+ 1022              	.LASF30:
+ 1023 00ed 433A5C55 		.ascii	"C:\\Users\\boise\\Documents\\PSoC Creator\\VoltMete"
+ 1023      73657273 
+ 1023      5C626F69 
+ 1023      73655C44 
+ 1023      6F63756D 
+ 1024 011b 725C4361 		.ascii	"r\\CarVolt1.cydsn\000"
+ 1024      72566F6C 
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 23
+
+
+ 1024      74312E63 
+ 1024      7964736E 
+ 1024      00
+ 1025              	.LASF19:
+ 1026 012c 76546865 		.ascii	"vThermistor\000"
+ 1026      726D6973 
+ 1026      746F7200 
+ 1027              	.LASF28:
+ 1028 0138 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1028      43313120 
+ 1028      352E342E 
+ 1028      31203230 
+ 1028      31363036 
+ 1029 016b 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m0 -mthumb -g -O"
+ 1029      20726576 
+ 1029      6973696F 
+ 1029      6E203233 
+ 1029      37373135 
+ 1030 019e 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1030      66756E63 
+ 1030      74696F6E 
+ 1030      2D736563 
+ 1030      74696F6E 
+ 1031              	.LASF17:
+ 1032 01c6 73697A65 		.ascii	"sizetype\000"
+ 1032      74797065 
+ 1032      00
+ 1033              	.LASF6:
+ 1034 01cf 6C6F6E67 		.ascii	"long long int\000"
+ 1034      206C6F6E 
+ 1034      6720696E 
+ 1034      7400
+ 1035              	.LASF15:
+ 1036 01dd 63686172 		.ascii	"char\000"
+ 1036      00
+ 1037              	.LASF2:
+ 1038 01e2 73686F72 		.ascii	"short int\000"
+ 1038      7420696E 
+ 1038      7400
+ 1039              	.LASF4:
+ 1040 01ec 6C6F6E67 		.ascii	"long int\000"
+ 1040      20696E74 
+ 1040      00
+ 1041              	.LASF20:
+ 1042 01f5 72657354 		.ascii	"resT\000"
+ 1042      00
+ 1043              	.LASF16:
+ 1044 01fa 6C6F6E67 		.ascii	"long double\000"
+ 1044      20646F75 
+ 1044      626C6500 
+ 1045              	.LASF0:
+ 1046 0206 7369676E 		.ascii	"signed char\000"
+ 1046      65642063 
+ 1046      68617200 
+ 1047              	.LASF27:
+ 1048 0212 6C617374 		.ascii	"last\000"
+ 1048      00
+ARM GAS  C:\Users\boise\AppData\Local\Temp\ccLnM2Oi.s 			page 24
+
+
+ 1049              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

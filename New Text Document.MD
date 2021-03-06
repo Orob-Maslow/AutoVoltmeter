@@ -1,0 +1,1 @@
+this project is to verify the battery charge level in a honda civic as well as measure external and internal temperature of the cabin.  the second volt meter measures the alternator output.  There is a strange failure where the alternator still works, but the battery does not charge in this model and since I'm adding electronics, I'm putting in some thermal sensors as well.

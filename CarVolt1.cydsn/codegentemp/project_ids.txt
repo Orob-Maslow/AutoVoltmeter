@@ -6,5 +6,5 @@ C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomp
 C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|a4fe9607-0229-4a5c-8625-9e4d520fb53f
 C:\Users\boise\Documents\PSoC Creator\VoltMeter\CarVolt1.cydsn\CarVolt1.cyprj|1cfd0d62-88e3-4a3d-a952-8ddb47626e47
 C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\default\CyReferenceLibrary\CyReferenceLibrary.cylib\CyReferenceLibrary.cyprj|a10e75d4-e21b-4731-b201-780bc124092c
-C:\Users\boise\Documents\PSoC Creator\VoltMeter\PWM01.cydsn\PWM01.cyprj|d787c6b1-1faa-474d-abcf-01155921dd6c
+C:\Users\boise\Documents\PSoC Creator\4.4\Examples\ThermistorCalc_Example\ThermistorCalc_Example.cydsn\ThermistorCalc_Example.cyprj|56ba45b1-cbe2-4173-9054-156609c91886
 C:\Users\boise\Documents\PSoC Creator\VoltMeter\Bootloader01.cydsn\Bootloader01.cyprj|581397f4-a8a0-48d9-958e-84a4d1a06061
